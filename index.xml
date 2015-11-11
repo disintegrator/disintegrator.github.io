@@ -7,8 +7,111 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>All rights reserved - 2015</copyright>
-    <lastBuildDate>Wed, 11 Nov 2015 15:08:51 +1100</lastBuildDate>
+    <lastBuildDate>Wed, 11 Nov 2015 15:59:43 +1100</lastBuildDate>
     <atom:link href="http://disintegrator.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>React Higher-Order Component to Show Loading and Error Pages</title>
+      <link>http://disintegrator.github.io/post/react-status-hoc/</link>
+      <pubDate>Wed, 11 Nov 2015 15:59:43 +1100</pubDate>
+      
+      <guid>http://disintegrator.github.io/post/react-status-hoc/</guid>
+      <description>&lt;p&gt;In my react web app, I sometimes need to fetch some resource from the server before I can render a page. This work will usually take some time and other times it may fail so we need a way to show the status of the resource requests.&lt;/p&gt;
+
+&lt;p&gt;The solution I use is a higher-order component that decorates page components. It assumes the presence of two properties on page components: &lt;code&gt;loading&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. The remaining configuration involves selecting the &lt;code&gt;LoadingComponent&lt;/code&gt; and &lt;code&gt;ErrorComponent&lt;/code&gt;. Let me show you what this looks:&lt;/p&gt;
+
+&lt;p&gt;The higher-order function:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span style=&#34;color: #aaaaaa; font-style: italic&#34;&gt;// pageStatus.jsx&lt;/span&gt;
+
+&lt;span style=&#34;color: #0000aa&#34;&gt;import&lt;/span&gt; React from &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;react&amp;#39;&lt;/span&gt;
+
+&lt;span style=&#34;color: #0000aa&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;default&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;function&lt;/span&gt;(mapPropsToStatus, ErrorPage, LoadingPage) {
+  &lt;span style=&#34;color: #0000aa&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;function&lt;/span&gt;(Page) {
+    &lt;span style=&#34;color: #0000aa&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;extends&lt;/span&gt; React.Component {
+      render() {
+        &lt;span style=&#34;color: #0000aa&#34;&gt;const&lt;/span&gt; {loading, error} = (mapPropsToStatus ? mapPropsToStatus(&lt;span style=&#34;color: #0000aa&#34;&gt;this&lt;/span&gt;.props) : &lt;span style=&#34;color: #0000aa&#34;&gt;null&lt;/span&gt;) || {}
+        &lt;span style=&#34;color: #0000aa&#34;&gt;let&lt;/span&gt; Component, key
+        &lt;span style=&#34;color: #0000aa&#34;&gt;if&lt;/span&gt; (error) {
+          key = &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;error&amp;#39;&lt;/span&gt;
+          Component = ErrorPage || Page
+        }
+        &lt;span style=&#34;color: #0000aa&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;if&lt;/span&gt; (loading) {
+          key = &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;loading&amp;#39;&lt;/span&gt;
+          Component = LoadingPage || Page
+        }
+        &lt;span style=&#34;color: #0000aa&#34;&gt;else&lt;/span&gt; {
+          key = &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;page&amp;#39;&lt;/span&gt;
+          Component = Page
+        }
+        &lt;span style=&#34;color: #0000aa&#34;&gt;return&lt;/span&gt; &amp;lt;Component key={key} {...&lt;span style=&#34;color: #0000aa&#34;&gt;this&lt;/span&gt;.props} /&amp;gt;
+      }
+    }
+  }
+}
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&amp;hellip; and now we decorate our pages:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span style=&#34;color: #aaaaaa; font-style: italic&#34;&gt;// Page.jsx&lt;/span&gt;
+
+&lt;span style=&#34;color: #0000aa&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;react&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color: #0000aa&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;./pageStatus&amp;#39;&lt;/span&gt;
+
+&lt;span style=&#34;color: #aaaaaa; font-style: italic&#34;&gt;// create a couple of simple error and loading page&lt;/span&gt;
+
+&lt;span style=&#34;color: #0000aa&#34;&gt;const&lt;/span&gt; ErrorPage = (props) =&amp;gt; &lt;span style=&#34;color: #0000aa&#34;&gt;return&lt;/span&gt; &amp;lt;div&amp;gt;&lt;span style=&#34;color: #00aaaa&#34;&gt;Error&lt;/span&gt;: {props.error.name}: {props.error.message}&amp;lt;&lt;span style=&#34;color: #FF0000; background-color: #FFAAAA&#34;&gt;/div&amp;gt;&lt;/span&gt;
+
+&lt;span style=&#34;color: #0000aa&#34;&gt;const&lt;/span&gt; LoadingPage = () =&amp;gt; &lt;span style=&#34;color: #0000aa&#34;&gt;return&lt;/span&gt; &amp;lt;div&amp;gt;Loading...&amp;lt;&lt;span style=&#34;color: #FF0000; background-color: #FFAAAA&#34;&gt;/div&amp;gt;&lt;/span&gt;
+
+&lt;span style=&#34;color: #FF0000; background-color: #FFAAAA&#34;&gt;@&lt;/span&gt;pageStatus(
+  ({loading, error}) =&amp;gt; ({loading, error}),
+  ErrorPage, LoadingPage
+)
+&lt;span style=&#34;color: #0000aa&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;default&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;class&lt;/span&gt; Page &lt;span style=&#34;color: #0000aa&#34;&gt;extends&lt;/span&gt; React.Component {
+  render() {
+    &amp;lt;div&amp;gt;Hello world&amp;lt;&lt;span style=&#34;color: #FF0000; background-color: #FFAAAA&#34;&gt;/div&amp;gt;&lt;/span&gt;
+  }
+}
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&amp;hellip; and run them in an app:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;highlight&#34; style=&#34;background: #ffffff&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span style=&#34;color: #aaaaaa; font-style: italic&#34;&gt;//app.js&lt;/span&gt;
+
+&lt;span style=&#34;color: #0000aa&#34;&gt;import&lt;/span&gt; React from &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;react&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color: #0000aa&#34;&gt;import&lt;/span&gt; ReactDOM from &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;react-dom&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color: #0000aa&#34;&gt;import&lt;/span&gt; Page from &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;./Page&amp;#39;&lt;/span&gt;
+
+&lt;span style=&#34;color: #0000aa&#34;&gt;class&lt;/span&gt; App &lt;span style=&#34;color: #0000aa&#34;&gt;extends&lt;/span&gt; React.Component {
+  constructor(props) {
+    &lt;span style=&#34;color: #0000aa&#34;&gt;super&lt;/span&gt;(props)
+    &lt;span style=&#34;color: #0000aa&#34;&gt;this&lt;/span&gt;.state = {}
+  }
+  doFakeWork() {
+    &lt;span style=&#34;color: #0000aa&#34;&gt;const&lt;/span&gt; error = [&lt;span style=&#34;color: #0000aa&#34;&gt;null&lt;/span&gt;, &lt;span style=&#34;color: #0000aa&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color: #00aaaa&#34;&gt;Error&lt;/span&gt;(&lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;Failure¡¡¡&amp;#39;&lt;/span&gt;)][&lt;span style=&#34;color: #00aaaa&#34;&gt;Math&lt;/span&gt;.round(&lt;span style=&#34;color: #00aaaa&#34;&gt;Math&lt;/span&gt;.random())]
+    &lt;span style=&#34;color: #0000aa&#34;&gt;this&lt;/span&gt;.setState({loading: &lt;span style=&#34;color: #0000aa&#34;&gt;true&lt;/span&gt;, error: &lt;span style=&#34;color: #0000aa&#34;&gt;null&lt;/span&gt;})
+    setTimeout(() =&amp;gt; &lt;span style=&#34;color: #0000aa&#34;&gt;this&lt;/span&gt;.setState({loading: &lt;span style=&#34;color: #0000aa&#34;&gt;false&lt;/span&gt;, error: error}), &lt;span style=&#34;color: #009999&#34;&gt;1000&lt;/span&gt;)
+  }
+  render() {
+    &lt;span style=&#34;color: #0000aa&#34;&gt;return&lt;/span&gt; (
+      &amp;lt;div&amp;gt;
+        &amp;lt;button type=&lt;span style=&#34;color: #aa5500&#34;&gt;&amp;quot;button&amp;quot;&lt;/span&gt; onClick={::&lt;span style=&#34;color: #0000aa&#34;&gt;this&lt;/span&gt;.doFakeWork}&amp;gt;Do Work&amp;lt;&lt;span style=&#34;color: #FF0000; background-color: #FFAAAA&#34;&gt;/button&amp;gt;&lt;/span&gt;
+        &amp;lt;Page loading={loading} error={error} /&amp;gt;
+      &amp;lt;&lt;span style=&#34;color: #FF0000; background-color: #FFAAAA&#34;&gt;/div&amp;gt;&lt;/span&gt;
+    )
+  }
+}
+
+ReactDOM.render(&amp;lt;App /&amp;gt;, &lt;span style=&#34;color: #00aaaa&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;app&amp;#39;&lt;/span&gt;))
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://jsfiddle.net/0awddh42/&#34;&gt;See it in action here&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Hi</title>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  	<meta property="og:title" content=" React Higher-Order Component to Show Loading and Error Pages &middot;  george.blog" />
+  	<meta property="og:site_name" content="george.blog" />
+  	<meta property="og:url" content="http://disintegrator.github.io/post/react-status-hoc/" />
+
+    
+  	<meta property="og:type" content="article" />
+
+    <meta property="og:article:published_time" content="2015-11-11T15:59:43&#43;11:00" />
+
+    
+    <meta property="og:article:tag" content="code" />
+    
+    <meta property="og:article:tag" content="javascript" />
+    
+    <meta property="og:article:tag" content="react" />
+    
+    
+
+  <title>
+     React Higher-Order Component to Show Loading and Error Pages &middot;  george.blog
+  </title>
+
+    <meta name="description" content="" />
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" href="http://disintegrator.github.io/images/favicon.ico">
+	  <link rel="apple-touch-icon" href="http://disintegrator.github.io/images/apple-touch-icon.png" />
+
+    <link rel="stylesheet" type="text/css" href="http://disintegrator.github.io/css/screen.css" />
+    <link rel="stylesheet" type="text/css" href="http://disintegrator.github.io/css/nav.css" />
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic|Open+Sans:700,400|Inconsolata" />
+
+
+    
+      
+          <link href="http://disintegrator.github.io/index.xml" rel="alternate" type="application/rss+xml" title="george.blog" />
+      
+      
+    
+    <meta name="generator" content="Hugo 0.14" />
+
+    <link rel="canonical" href="http://disintegrator.github.io/post/react-status-hoc/" />
+
+    
+
+    
+</head>
+<body class="nav-closed">
+
+  <div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">Close</span>
+    </a>
+    <ul>
+        
+        
+        
+    </ul>
+    
+    
+    <a class="subscribe-button icon-feed" href="http://disintegrator.github.io/index.xml">Subscribe</a>
+    
+</div>
+<span class="nav-cover"></span>
+
+
+ <div class="site-wrapper">
+
+
+
+
+<header class="main-header post-head no-cover">
+  <nav class="main-nav clearfix">
+
+
+  
+  
+      <a class="menu-button icon-feed" href="http://disintegrator.github.io/index.xml">&nbsp;&nbsp;Subscribe</a>
+  
+  </nav>
+</header>
+
+
+
+<main class="content" role="main">
+
+
+
+
+  <article class="post post">
+
+    <header class="post-header">
+        <h1 class="post-title">React Higher-Order Component to Show Loading and Error Pages</h1>
+        <small></small>
+
+        <section class="post-meta">
+        
+          <time class="post-date" datetime="2015-11-11T15:59:43&#43;11:00">
+            Nov 11, 2015
+          </time>
+        
+         
+          <span class="post-tag small"><a href="http://disintegrator.github.io/tags/code/">#code</a></span>
+         
+          <span class="post-tag small"><a href="http://disintegrator.github.io/tags/javascript/">#javascript</a></span>
+         
+          <span class="post-tag small"><a href="http://disintegrator.github.io/tags/react/">#react</a></span>
+         
+        </section>
+    </header>
+
+    <section class="post-content">
+      <p>In my react web app, I sometimes need to fetch some resource from the server before I can render a page. This work will usually take some time and other times it may fail so we need a way to show the status of the resource requests.</p>
+
+<p>The solution I use is a higher-order component that decorates page components. It assumes the presence of two properties on page components: <code>loading</code> and <code>error</code>. The remaining configuration involves selecting the <code>LoadingComponent</code> and <code>ErrorComponent</code>. Let me show you what this looks:</p>
+
+<p>The higher-order function:</p>
+
+<p><div class="highlight" style="background: #ffffff"><pre style="line-height: 125%"><span style="color: #aaaaaa; font-style: italic">// pageStatus.jsx</span>
+
+<span style="color: #0000aa">import</span> React from <span style="color: #aa5500">&#39;react&#39;</span>
+
+<span style="color: #0000aa">export</span> <span style="color: #0000aa">default</span> <span style="color: #0000aa">function</span>(mapPropsToStatus, ErrorPage, LoadingPage) {
+  <span style="color: #0000aa">return</span> <span style="color: #0000aa">function</span>(Page) {
+    <span style="color: #0000aa">return</span> <span style="color: #0000aa">class</span> <span style="color: #0000aa">extends</span> React.Component {
+      render() {
+        <span style="color: #0000aa">const</span> {loading, error} = (mapPropsToStatus ? mapPropsToStatus(<span style="color: #0000aa">this</span>.props) : <span style="color: #0000aa">null</span>) || {}
+        <span style="color: #0000aa">let</span> Component, key
+        <span style="color: #0000aa">if</span> (error) {
+          key = <span style="color: #aa5500">&#39;error&#39;</span>
+          Component = ErrorPage || Page
+        }
+        <span style="color: #0000aa">else</span> <span style="color: #0000aa">if</span> (loading) {
+          key = <span style="color: #aa5500">&#39;loading&#39;</span>
+          Component = LoadingPage || Page
+        }
+        <span style="color: #0000aa">else</span> {
+          key = <span style="color: #aa5500">&#39;page&#39;</span>
+          Component = Page
+        }
+        <span style="color: #0000aa">return</span> &lt;Component key={key} {...<span style="color: #0000aa">this</span>.props} /&gt;
+      }
+    }
+  }
+}
+</pre></div>
+</p>
+
+<p>&hellip; and now we decorate our pages:</p>
+
+<p><div class="highlight" style="background: #ffffff"><pre style="line-height: 125%"><span style="color: #aaaaaa; font-style: italic">// Page.jsx</span>
+
+<span style="color: #0000aa">import</span> <span style="color: #aa5500">&#39;react&#39;</span>
+<span style="color: #0000aa">import</span> <span style="color: #aa5500">&#39;./pageStatus&#39;</span>
+
+<span style="color: #aaaaaa; font-style: italic">// create a couple of simple error and loading page</span>
+
+<span style="color: #0000aa">const</span> ErrorPage = (props) =&gt; <span style="color: #0000aa">return</span> &lt;div&gt;<span style="color: #00aaaa">Error</span>: {props.error.name}: {props.error.message}&lt;<span style="color: #FF0000; background-color: #FFAAAA">/div&gt;</span>
+
+<span style="color: #0000aa">const</span> LoadingPage = () =&gt; <span style="color: #0000aa">return</span> &lt;div&gt;Loading...&lt;<span style="color: #FF0000; background-color: #FFAAAA">/div&gt;</span>
+
+<span style="color: #FF0000; background-color: #FFAAAA">@</span>pageStatus(
+  ({loading, error}) =&gt; ({loading, error}),
+  ErrorPage, LoadingPage
+)
+<span style="color: #0000aa">export</span> <span style="color: #0000aa">default</span> <span style="color: #0000aa">class</span> Page <span style="color: #0000aa">extends</span> React.Component {
+  render() {
+    &lt;div&gt;Hello world&lt;<span style="color: #FF0000; background-color: #FFAAAA">/div&gt;</span>
+  }
+}
+</pre></div>
+</p>
+
+<p>&hellip; and run them in an app:</p>
+
+<p><div class="highlight" style="background: #ffffff"><pre style="line-height: 125%"><span style="color: #aaaaaa; font-style: italic">//app.js</span>
+
+<span style="color: #0000aa">import</span> React from <span style="color: #aa5500">&#39;react&#39;</span>
+<span style="color: #0000aa">import</span> ReactDOM from <span style="color: #aa5500">&#39;react-dom&#39;</span>
+<span style="color: #0000aa">import</span> Page from <span style="color: #aa5500">&#39;./Page&#39;</span>
+
+<span style="color: #0000aa">class</span> App <span style="color: #0000aa">extends</span> React.Component {
+  constructor(props) {
+    <span style="color: #0000aa">super</span>(props)
+    <span style="color: #0000aa">this</span>.state = {}
+  }
+  doFakeWork() {
+    <span style="color: #0000aa">const</span> error = [<span style="color: #0000aa">null</span>, <span style="color: #0000aa">new</span> <span style="color: #00aaaa">Error</span>(<span style="color: #aa5500">&#39;Failure¡¡¡&#39;</span>)][<span style="color: #00aaaa">Math</span>.round(<span style="color: #00aaaa">Math</span>.random())]
+    <span style="color: #0000aa">this</span>.setState({loading: <span style="color: #0000aa">true</span>, error: <span style="color: #0000aa">null</span>})
+    setTimeout(() =&gt; <span style="color: #0000aa">this</span>.setState({loading: <span style="color: #0000aa">false</span>, error: error}), <span style="color: #009999">1000</span>)
+  }
+  render() {
+    <span style="color: #0000aa">return</span> (
+      &lt;div&gt;
+        &lt;button type=<span style="color: #aa5500">&quot;button&quot;</span> onClick={::<span style="color: #0000aa">this</span>.doFakeWork}&gt;Do Work&lt;<span style="color: #FF0000; background-color: #FFAAAA">/button&gt;</span>
+        &lt;Page loading={loading} error={error} /&gt;
+      &lt;<span style="color: #FF0000; background-color: #FFAAAA">/div&gt;</span>
+    )
+  }
+}
+
+ReactDOM.render(&lt;App /&gt;, <span style="color: #00aaaa">document</span>.getElementById(<span style="color: #aa5500">&#39;app&#39;</span>))
+</pre></div>
+</p>
+
+<p><a href="https://jsfiddle.net/0awddh42/">See it in action here</a></p>
+
+    </section>
+
+
+  <footer class="post-footer">
+
+
+    
+
+    
+
+
+
+
+
+<section class="author">
+  <h4><a href="http://disintegrator.github.io/">George Haidar</a></h4>
+  
+  <p>Read <a href="http://disintegrator.github.io/">more posts</a> by this author.</p>
+  
+  <div class="author-meta">
+    <span class="author-location icon-location">Sydney, Australia</span>
+    <span class="author-link icon-link"><a href="http://disintegrator.github.io">http://disintegrator.github.io</a></span>
+  </div>
+</section>
+
+
+
+    
+<section class="share">
+  <h4>Share this post</h4>
+  <a class="icon-twitter" style="font-size: 1.4em" href="https://twitter.com/share?text=React%20Higher-Order%20Component%20to%20Show%20Loading%20and%20Error%20Pages&amp;url=http%3a%2f%2fdisintegrator.github.io%2fpost%2freact-status-hoc%2f"
+      onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+      <span class="hidden">Twitter</span>
+  </a>
+  <a class="icon-facebook" style="font-size: 1.4em" href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fdisintegrator.github.io%2fpost%2freact-status-hoc%2f"
+      onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+      <span class="hidden">Facebook</span>
+  </a>
+  <a class="icon-pinterest" style="font-size: 1.4em" href="http://pinterest.com/pin/create/button/?url=http%3a%2f%2fdisintegrator.github.io%2fpost%2freact-status-hoc%2f&amp;description=React%20Higher-Order%20Component%20to%20Show%20Loading%20and%20Error%20Pages"
+      onclick="window.open(this.href, 'pinterest-share','width=580,height=296');return false;">
+      <span class="hidden">Pinterest</span>
+  </a>
+  <a class="icon-google-plus" style="font-size: 1.4em" href="https://plus.google.com/share?url=http%3a%2f%2fdisintegrator.github.io%2fpost%2freact-status-hoc%2f"
+     onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+      <span class="hidden">Google+</span>
+  </a>
+</section>
+
+
+
+    
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+  var disqus_shortname = 'georgedotblog';
+  var disqus_url = 'http:\/\/disintegrator.github.io\/post\/react-status-hoc\/';
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+  </footer>
+</article>
+
+</main>
+    <footer class="site-footer clearfix">
+        <section class="copyright"><a href="">george.blog</a> All rights reserved - 2015</section>
+        
+        <section class="poweredby">Proudly generated by <a class="icon-hugo" href="http://gohugo.io">HUGO</a>, with <a class="icon-theme" href="https://github.com/vjeantet/hugo-theme-casper">Casper</a> theme</section>
+        
+    </footer>
+    </div>
+    <script type="text/javascript" src="http://disintegrator.github.io/js/jquery.js"></script>
+    <script type="text/javascript" src="http://disintegrator.github.io/js/jquery.fitvids.js"></script>
+    <script type="text/javascript" src="http://disintegrator.github.io/js/index.js"></script>
+    
+</body>
+</html>
+

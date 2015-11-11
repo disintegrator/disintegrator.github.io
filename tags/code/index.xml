@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on george.blog</title>
-    <link>http://disintegrator.github.io/post/</link>
-    <description>Recent content in Posts on george.blog</description>
+    <title>Code on george.blog</title>
+    <link>http://disintegrator.github.io/tags/code/</link>
+    <description>Recent content in Code on george.blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>All rights reserved - 2015</copyright>
     <lastBuildDate>Wed, 11 Nov 2015 15:59:43 +1100</lastBuildDate>
-    <atom:link href="http://disintegrator.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://disintegrator.github.io/tags/code/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>React Higher-Order Component to Show Loading and Error Pages</title>
@@ -110,20 +110,6 @@ ReactDOM.render(&amp;lt;App /&amp;gt;, &lt;span style=&#34;color: #00aaaa&#34;&g
 &lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://jsfiddle.net/0awddh42/&#34;&gt;See it in action here&lt;/a&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Hi</title>
-      <link>http://disintegrator.github.io/post/hi/</link>
-      <pubDate>Wed, 11 Nov 2015 15:08:51 +1100</pubDate>
-      
-      <guid>http://disintegrator.github.io/post/hi/</guid>
-      <description>&lt;p&gt;Hi&lt;/p&gt;
-
-&lt;p&gt;My name is George Haidar and I have been a software engineer specialising in web development since 2006. I spend a lot of time researching new tools and technologies to help me build better systems and I want to share my thoughts and finding with you.&lt;/p&gt;
-
-&lt;p&gt;I thank you for your time and welcome any contributions (read: comments and corrections).&lt;/p&gt;
 </description>
     </item>
     
