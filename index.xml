@@ -31,20 +31,11 @@
     &lt;span style=&#34;color: #0000aa&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;extends&lt;/span&gt; React.Component {
       render() {
         &lt;span style=&#34;color: #0000aa&#34;&gt;const&lt;/span&gt; {loading, error} = (mapPropsToStatus ? mapPropsToStatus(&lt;span style=&#34;color: #0000aa&#34;&gt;this&lt;/span&gt;.props) : &lt;span style=&#34;color: #0000aa&#34;&gt;null&lt;/span&gt;) || {}
-        &lt;span style=&#34;color: #0000aa&#34;&gt;let&lt;/span&gt; Component, key
-        &lt;span style=&#34;color: #0000aa&#34;&gt;if&lt;/span&gt; (error) {
-          key = &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;error&amp;#39;&lt;/span&gt;
-          Component = ErrorPage || Page
-        }
-        &lt;span style=&#34;color: #0000aa&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;if&lt;/span&gt; (loading) {
-          key = &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;loading&amp;#39;&lt;/span&gt;
-          Component = LoadingPage || Page
-        }
-        &lt;span style=&#34;color: #0000aa&#34;&gt;else&lt;/span&gt; {
-          key = &lt;span style=&#34;color: #aa5500&#34;&gt;&amp;#39;page&amp;#39;&lt;/span&gt;
-          Component = Page
-        }
-        &lt;span style=&#34;color: #0000aa&#34;&gt;return&lt;/span&gt; &amp;lt;Component key={key} {...&lt;span style=&#34;color: #0000aa&#34;&gt;this&lt;/span&gt;.props} /&amp;gt;
+        &lt;span style=&#34;color: #0000aa&#34;&gt;let&lt;/span&gt; Component
+        &lt;span style=&#34;color: #0000aa&#34;&gt;if&lt;/span&gt; (error) { Component = ErrorPage || Page }
+        &lt;span style=&#34;color: #0000aa&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color: #0000aa&#34;&gt;if&lt;/span&gt; (loading) { Component = LoadingPage || Page }
+        &lt;span style=&#34;color: #0000aa&#34;&gt;else&lt;/span&gt; { Component = Page }
+        &lt;span style=&#34;color: #0000aa&#34;&gt;return&lt;/span&gt; &amp;lt;Component {...&lt;span style=&#34;color: #0000aa&#34;&gt;this&lt;/span&gt;.props} /&amp;gt;
       }
     }
   }

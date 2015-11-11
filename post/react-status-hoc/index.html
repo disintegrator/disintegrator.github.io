@@ -135,20 +135,11 @@
     <span style="color: #0000aa">return</span> <span style="color: #0000aa">class</span> <span style="color: #0000aa">extends</span> React.Component {
       render() {
         <span style="color: #0000aa">const</span> {loading, error} = (mapPropsToStatus ? mapPropsToStatus(<span style="color: #0000aa">this</span>.props) : <span style="color: #0000aa">null</span>) || {}
-        <span style="color: #0000aa">let</span> Component, key
-        <span style="color: #0000aa">if</span> (error) {
-          key = <span style="color: #aa5500">&#39;error&#39;</span>
-          Component = ErrorPage || Page
-        }
-        <span style="color: #0000aa">else</span> <span style="color: #0000aa">if</span> (loading) {
-          key = <span style="color: #aa5500">&#39;loading&#39;</span>
-          Component = LoadingPage || Page
-        }
-        <span style="color: #0000aa">else</span> {
-          key = <span style="color: #aa5500">&#39;page&#39;</span>
-          Component = Page
-        }
-        <span style="color: #0000aa">return</span> &lt;Component key={key} {...<span style="color: #0000aa">this</span>.props} /&gt;
+        <span style="color: #0000aa">let</span> Component
+        <span style="color: #0000aa">if</span> (error) { Component = ErrorPage || Page }
+        <span style="color: #0000aa">else</span> <span style="color: #0000aa">if</span> (loading) { Component = LoadingPage || Page }
+        <span style="color: #0000aa">else</span> { Component = Page }
+        <span style="color: #0000aa">return</span> &lt;Component {...<span style="color: #0000aa">this</span>.props} /&gt;
       }
     }
   }
