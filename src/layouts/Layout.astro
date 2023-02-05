@@ -1,0 +1,36 @@
+---
+import SiteNav from "../components/SiteNav.astro";
+import "../styles/fonts.css";
+
+export interface Props {
+	title: string;
+	titleQualifier?: string;
+}
+
+const { title, titleQualifier = " | Georges Haidar" } = Astro.props as Props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/jpeg" href="/favicon.jpg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}{titleQualifier}</title>
+	</head>
+	<body class="text-zinc-800 dark:bg-zinc-900 dark:text-zinc-50">
+		<div
+			class="grid auto-rows-max md:auto-rows-auto grid-cols-1 md:grid-cols-12 min-h-screen"
+		>
+			<div
+				class="col-span-full md:col-span-3 px-6 pt-6 pb-3 md:pb-6 border-b border-dotted border-orange-400 md:border-b-0 md:border-r"
+			>
+				<SiteNav />
+			</div>
+			<div class="col-span-full md:col-span-6">
+				<slot />
+			</div>
+		</div>
+	</body>
+</html>

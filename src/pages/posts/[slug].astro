@@ -1,0 +1,30 @@
+---
+import { CollectionEntry, getCollection } from "astro:content";
+import BlockQuote from "../../components/BlockQuote.astro";
+
+import H1 from "../../components/H1.astro";
+import H2 from "../../components/H2.astro";
+import Link from "../../components/Link.astro";
+import P from "../../components/P.astro";
+import PostLayout from "../../layouts/PostLayout.astro";
+
+export async function getStaticPaths() {
+	const posts = await getCollection("posts");
+	return posts.map((entry) => ({
+		params: { slug: entry.slug },
+		props: { entry },
+	}));
+}
+
+type Props = { entry: CollectionEntry<"posts"> };
+
+const { entry } = Astro.props as Props;
+const { Content } = await entry.render();
+---
+
+<PostLayout title={entry.data.title}>
+	<article>
+		<H1>{entry.data.title}</H1>
+		<Content components={{ blockquote: BlockQuote, p: P, h2: H2, a: Link }} />
+	</article>
+</PostLayout>

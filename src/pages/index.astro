@@ -1,0 +1,57 @@
+---
+import { Image } from "@astrojs/image/components";
+import Layout from "../layouts/Layout.astro";
+
+import { getCollection } from "astro:content";
+import Link from "../components/Link.astro";
+import H1 from "../components/H1.astro";
+const posts = await getCollection("posts");
+---
+
+<Layout title="Blog">
+	<main>
+		<header
+			class="flex flex-col gap-4 mb-6 p-6 border-b border-dotted border-orange-400 text-center md:text-start items-center md:items-start"
+		>
+			<div>
+				<Image
+					class="rounded-full"
+					width={150}
+					aspectRatio={1}
+					src={import("../images/profile.jpg")}
+					alt=""
+				/>
+			</div>
+			<p class="text-xl">
+				Hi there, I'm Georges.<br />
+				Australian software engineer based in London.
+			</p>
+		</header>
+		<nav class="p-6" aria-labelledby="latest-posts">
+			<H1 id="latest-posts">Latest posts</H1>
+			<ul>
+				{
+					posts.map((post) => {
+						const pubDate = new Intl.DateTimeFormat("en-GB", {
+							dateStyle: "long",
+						}).format(post.data.publishDate);
+
+						return (
+							<li>
+								<h2 class="text-xl">
+									<Link href={`/posts/${post.slug}`}>{post.data.title}</Link>
+								</h2>
+								<p class="text-sm text-zinc-700 dark:text-zinc-400 mb-4">
+									{pubDate}
+								</p>
+								<p class="text-zinc-600 dark:text-zinc-300">
+									{post.data.summary}
+								</p>
+							</li>
+						);
+					})
+				}
+			</ul>
+		</nav>
+	</main>
+</Layout>

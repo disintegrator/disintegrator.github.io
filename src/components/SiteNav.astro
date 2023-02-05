@@ -1,0 +1,23 @@
+---
+import Link from "./Link.astro";
+---
+
+<nav class="md:text-right" aria-labelledby="site-nav-title">
+	<span id="site-nav-title" class="sr-only">Site navigation</span>
+	<h2 class="font-light text-xl md:text-2xl md:mb-4">Georges Haidar</h2>
+	<ul
+		class="font-extralight text-base md:text-xl grid gap-2 grid-flow-col auto-cols-max md:grid-flow-row md:justify-end"
+	>
+		<li>
+			<Link href="/">Home</Link>
+		</li>
+		<li>
+			<Link href="https://twitter.com/ghaidar0">Twitter</Link>
+		</li>
+		<li>
+			<Link href="https://www.linkedin.com/in/georges-haidar-a9314123/">
+				LinkedIn
+			</Link>
+		</li>
+	</ul>
+</nav>

@@ -1,0 +1,11 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = Omit<HTMLAttributes<"p">, "class">;
+
+const props = Astro.props as Props;
+---
+
+<p {...props} class="mb-4 last:mb-0">
+	<slot />
+</p>
