@@ -5,9 +5,14 @@ import "../styles/fonts.css";
 export interface Props {
 	title: string;
 	titleQualifier?: string;
+	description: string;
 }
 
-const { title, titleQualifier = " | Georges Haidar" } = Astro.props as Props;
+const {
+	title,
+	titleQualifier = " | Georges Haidar",
+	description,
+} = Astro.props as Props;
 ---
 
 <!DOCTYPE html>
@@ -15,6 +20,7 @@ const { title, titleQualifier = " | Georges Haidar" } = Astro.props as Props;
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={description} />
 		<link rel="icon" type="image/jpeg" href="/favicon.jpg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}{titleQualifier}</title>
