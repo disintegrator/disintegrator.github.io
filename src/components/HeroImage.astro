@@ -8,11 +8,16 @@ type Props = Omit<PictureComponentLocalImageProps, "slot"> & {
 	children?: unknown;
 };
 
-const { children, widths = [640], ...imageProps } = Astro.props as Props;
+const {
+	children,
+	loading = "eager",
+	widths = [640],
+	...imageProps
+} = Astro.props as Props;
 ---
 
 <figure class="mb-8">
-	<Picture widths={widths} {...imageProps} />
+	<Picture widths={widths} loading={loading} {...imageProps} />
 	<figcaption class="empty:hidden text-xs text-center mt-1">
 		<slot />
 	</figcaption>
