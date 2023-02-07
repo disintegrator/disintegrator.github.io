@@ -1,9 +1,11 @@
 ---
+import { Image } from "@astrojs/image/components";
 import { CollectionEntry, getCollection } from "astro:content";
 import BlockQuote from "../../components/BlockQuote.astro";
 
 import H1 from "../../components/H1.astro";
 import H2 from "../../components/H2.astro";
+import HeroImage from "../../components/HeroImage.astro";
 import Link from "../../components/Link.astro";
 import P from "../../components/P.astro";
 import PostLayout from "../../layouts/PostLayout.astro";
@@ -25,6 +27,16 @@ const { Content } = await entry.render();
 <PostLayout title={entry.data.title}>
 	<article>
 		<H1>{entry.data.title}</H1>
-		<Content components={{ blockquote: BlockQuote, p: P, h2: H2, a: Link }} />
+		<Content
+			components={{
+				blockquote: BlockQuote,
+				p: P,
+				h2: H2,
+				a: Link,
+				HeroImage,
+				Image,
+				Link,
+			}}
+		/>
 	</article>
 </PostLayout>
