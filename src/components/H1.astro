@@ -6,6 +6,6 @@ type Props = Omit<HTMLAttributes<"h1">, "class">;
 const props = Astro.props as Props;
 ---
 
-<h1 {...props} class="text-3xl sm:text-3xl mb-4 md:mb-6">
+<h1 {...props} class="text-3xl mb-4 md:mb-6">
 	<slot />
 </h1>

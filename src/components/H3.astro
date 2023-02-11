@@ -1,0 +1,11 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = Omit<HTMLAttributes<"h3">, "class">;
+
+const props = Astro.props as Props;
+---
+
+<h3 {...props} class="font-light text-xl mt-6 mb-4">
+	<slot />
+</h3>

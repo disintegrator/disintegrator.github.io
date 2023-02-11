@@ -10,6 +10,7 @@ import P from "../components/P.astro";
 import HeroImage from "../components/HeroImage.astro";
 import Layout, { Props as LayoutProps } from "./Layout.astro";
 import Tip from "../components/Tip.astro";
+import H3 from "../components/H3.astro";
 
 export interface Props extends Omit<LayoutProps, "title" | "description"> {
 	entry: CollectionEntry<"posts">;
@@ -27,6 +28,7 @@ const { Content } = await entry.render();
 				blockquote: BlockQuote,
 				p: P,
 				h2: H2,
+				h3: H3,
 				a: Link,
 				ul: UL,
 				HeroImage,
