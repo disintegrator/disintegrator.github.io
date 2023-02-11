@@ -8,6 +8,7 @@ import H2 from "../../components/H2.astro";
 import HeroImage from "../../components/HeroImage.astro";
 import Link from "../../components/Link.astro";
 import P from "../../components/P.astro";
+import UL from "../../components/UL.astro";
 import PostLayout from "../../layouts/PostLayout.astro";
 
 export async function getStaticPaths() {
@@ -33,6 +34,7 @@ const { Content } = await entry.render();
 				p: P,
 				h2: H2,
 				a: Link,
+				ul: UL,
 				HeroImage,
 				Image,
 				Link,
