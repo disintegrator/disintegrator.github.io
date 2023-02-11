@@ -8,8 +8,8 @@ import UL from "../components/UL.astro";
 import BlockQuote from "../components/BlockQuote.astro";
 import P from "../components/P.astro";
 import HeroImage from "../components/HeroImage.astro";
-
 import Layout, { Props as LayoutProps } from "./Layout.astro";
+import Tip from "../components/Tip.astro";
 
 export interface Props extends Omit<LayoutProps, "title" | "description"> {
 	entry: CollectionEntry<"posts">;
@@ -32,6 +32,7 @@ const { Content } = await entry.render();
 				HeroImage,
 				Image,
 				Link,
+				Tip,
 			}}
 		/>
 	</article>
