@@ -6,12 +6,14 @@ export interface Props {
 	title: string;
 	titleQualifier?: string;
 	description: string;
+	noIndex?: boolean;
 }
 
 const {
 	title,
 	titleQualifier = " | Georges Haidar",
 	description,
+	noIndex = false,
 } = Astro.props as Props;
 ---
 
@@ -19,9 +21,11 @@ const {
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
+		{noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}
 		<meta name="viewport" content="width=device-width" />
 		<meta name="description" content={description} />
 		<link rel="icon" type="image/jpeg" href="/favicon.jpg" />
+		<link rel="stylesheet" href="/fonts.css" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}{titleQualifier}</title>
 	</head>

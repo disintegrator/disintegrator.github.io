@@ -6,10 +6,12 @@ import { getCollection } from "astro:content";
 import Link from "../components/Link.astro";
 import H1 from "../components/H1.astro";
 
-const posts = await getCollection("posts");
-posts.sort((a, b) => {
-	return b.data.publishDate.getTime() - a.data.publishDate.getTime();
-});
+let posts = await getCollection("posts");
+posts = posts
+	.filter((p) => !p.data.draft)
+	.sort((a, b) => {
+		return b.data.publishDate.getTime() - a.data.publishDate.getTime();
+	});
 ---
 
 <Layout

@@ -9,7 +9,7 @@ export async function getStaticPaths() {
 		props: { entry: CollectionEntry<"posts"> };
 	}> = [];
 	return posts.reduce((acc, entry) => {
-		if (entry.data.draft) {
+		if (!entry.data.draft) {
 			return acc;
 		}
 
