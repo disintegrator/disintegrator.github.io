@@ -6,7 +6,11 @@ import image from "@astrojs/image";
 export default defineConfig({
 	site: "https://blog.disintegrator.dev",
 	integrations: [
-		tailwind(),
+		tailwind({
+			config: {
+				applyBaseStyles: false,
+			},
+		}),
 		mdx(),
 		image({ serviceEntryPoint: "@astrojs/image/sharp" }),
 	],
