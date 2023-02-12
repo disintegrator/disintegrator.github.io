@@ -27,10 +27,21 @@ const tocTree = generateTableOfContents(headings);
 <Layout {...rest} title={entry.data.title} description={entry.data.summary}>
 	<div class="sr-only" id="back-to-top">Top of page</div>
 	<div
-		class="grid auto-rows-max lg:auto-rows-auto grid-cols-1 lg:grid-cols-12 min-h-screen"
+		class:list={[
+			"grid",
+			"auto-rows-max lg:auto-rows-auto",
+			"grid-cols-1 lg:grid-cols-12",
+			"min-h-screen",
+		]}
 	>
 		<div
-			class="col-span-full lg:col-span-2 px-6 pt-6 pb-3 lg:pb-6 border-b border-dotted border-orange-400 lg:border-b-0 lg:border-r"
+			class:list={[
+				"col-span-full lg:col-span-2",
+				"px-6 pt-6 pb-3 lg:pb-6",
+				"border-b lg:border-b-0 lg:border-r",
+				"border-dotted",
+				"border-orange-400",
+			]}
 		>
 			<SiteNav />
 		</div>
@@ -54,7 +65,11 @@ const tocTree = generateTableOfContents(headings);
 			</article>
 		</div>
 		<aside
-			class="hidden lg:block col-span-full lg:col-span-3 xl:col-span-2 relative"
+			class:list={[
+				"hidden lg:block",
+				"relative",
+				"col-span-full lg:col-span-3 xl:col-span-2",
+			]}
 		>
 			<nav class="sticky top-0 p-6" aria-label="Table of contents">
 				<TableOfContents items={tocTree} />
