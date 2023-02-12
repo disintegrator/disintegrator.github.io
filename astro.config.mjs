@@ -14,4 +14,7 @@ export default defineConfig({
 		mdx(),
 		image({ serviceEntryPoint: "@astrojs/image/sharp" }),
 	],
+	markdown: {
+		shikiConfig: { theme: "css-variables" },
+	},
 });
