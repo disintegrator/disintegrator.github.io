@@ -1,0 +1,42 @@
+---
+import Link from "./Link.astro";
+import type { TocItem } from "./tocHelpers";
+
+type Props = {
+	items: TocItem[];
+	level?: number;
+};
+
+const { items, level = 0 } = Astro.props as Props;
+---
+
+<ul>
+	{
+		items.map((item) => {
+			return (
+				<li>
+					<Link
+						class:list={[
+							level === 0 && "pl-4",
+							level === 1 && "pl-8",
+							level === 2 && "pl-12",
+							level > 2 && "pl-12",
+							"border-l-2",
+							"border-orange-700/30",
+							"hover:border-orange-600",
+							"dark:border-orange-400/30",
+							"dark:hover:border-orange-300",
+							"block",
+						]}
+						href={`#${item.slug}`}
+					>
+						{item.text}
+					</Link>
+					{item.children.length > 0 ? (
+						<Astro.self items={item.children} level={level + 1} />
+					) : null}
+				</li>
+			);
+		})
+	}
+</ul>

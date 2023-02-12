@@ -1,5 +1,4 @@
 ---
-import SiteNav from "../components/SiteNav.astro";
 import "../styles/base.css";
 import "../styles/fonts.css";
 
@@ -30,17 +29,6 @@ const {
 		<title>{title}{titleQualifier}</title>
 	</head>
 	<body class="text-zinc-800 dark:bg-zinc-900 dark:text-zinc-50">
-		<div
-			class="grid auto-rows-max md:auto-rows-auto grid-cols-1 md:grid-cols-12 min-h-screen"
-		>
-			<div
-				class="col-span-full md:col-span-3 px-6 pt-6 pb-3 md:pb-6 border-b border-dotted border-orange-400 md:border-b-0 md:border-r"
-			>
-				<SiteNav />
-			</div>
-			<div class="col-span-full md:col-span-6">
-				<slot />
-			</div>
-		</div>
+		<slot />
 	</body>
 </html>
