@@ -34,8 +34,8 @@ const tocTree = generateTableOfContents(headings);
 		>
 			<SiteNav />
 		</div>
-		<div class="col-span-full lg:col-span-6 xl:col-span-4">
-			<article class="max-w-2xl p-6">
+		<div class="col-span-full lg:col-span-6 xl:col-span-8">
+			<article class="mx-auto lg:mx-0 max-w-2xl p-6">
 				<H1>{entry.data.title}</H1>
 				<Content
 					components={{
@@ -53,7 +53,9 @@ const tocTree = generateTableOfContents(headings);
 				/>
 			</article>
 		</div>
-		<aside class="col-span-full lg:col-span-4 relative">
+		<aside
+			class="hidden lg:block col-span-full lg:col-span-3 xl:col-span-2 relative"
+		>
 			<nav class="sticky top-0 p-6" aria-label="Table of contents">
 				<TableOfContents items={tocTree} />
 			</nav>
