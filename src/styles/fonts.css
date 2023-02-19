@@ -2,7 +2,15 @@
   font-family: 'Inter';
   src: url('/fonts/Inter-VariableFont_slnt,wght.ttf') format('truetype-variations'),
         url('/fonts/Inter-VariableFont_slnt,wght.ttf') format('truetype');
-  font-weight: 100 1000;
-  font-stretch: 25% 150%;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inconsolata';
+  src: url('/fonts/Inconsolata-VariableFont_wdth,wght.ttf') format('truetype-variations'),
+        url('/fonts/Inconsolata-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 200 900;
+  font-stretch: 50% 200%;
   font-display: swap;
 }
