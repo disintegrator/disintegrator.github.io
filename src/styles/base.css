@@ -11,7 +11,7 @@
   --astro-code-token-keyword: theme(colors.red.600);
   --astro-code-token-parameter: theme(colors.rose.500);
   --astro-code-token-function: theme(colors.pink.600);
-  --astro-code-token-string-expression: theme(colors.green.600);
+  --astro-code-token-string-expression: theme(colors.green.700);
   --astro-code-token-punctuation: theme(colors.zinc.900);
   --astro-code-token-link: theme(colors.indigo.500);
 }
