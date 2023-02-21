@@ -15,6 +15,7 @@ import { generateTableOfContents } from "../components/tocHelpers";
 import TableOfContents from "../components/TableOfContents.astro";
 import SiteNav from "../components/SiteNav.astro";
 import Code from "../components/Code.astro";
+import HR from "../components/HR.astro";
 
 export interface Props extends Omit<LayoutProps, "title" | "description"> {
 	entry: CollectionEntry<"posts">;
@@ -57,6 +58,7 @@ const tocTree = generateTableOfContents(headings);
 						h3: H3,
 						a: Link,
 						ul: UL,
+						hr: HR,
 						code: Code,
 						HeroImage,
 						Image,
