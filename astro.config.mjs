@@ -20,5 +20,9 @@ export default defineConfig({
 	markdown: {
 		shikiConfig: { theme: "css-variables" },
 		rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, autolinkConfig]],
+		remarkRehype: {
+			footnoteLabel: "Footnotes",
+		},
+		gfm: true,
 	},
 });

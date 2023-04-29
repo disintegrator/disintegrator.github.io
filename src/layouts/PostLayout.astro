@@ -4,6 +4,7 @@ import type { CollectionEntry } from "astro:content";
 import H1 from "../components/H1.astro";
 import H2 from "../components/H2.astro";
 import Link from "../components/Link.astro";
+import OL from "../components/OL.astro";
 import UL from "../components/UL.astro";
 import BlockQuote from "../components/BlockQuote.astro";
 import P from "../components/P.astro";
@@ -57,6 +58,7 @@ const tocTree = generateTableOfContents(headings);
 						h2: H2,
 						h3: H3,
 						a: Link,
+						ol: OL,
 						ul: UL,
 						hr: HR,
 						code: Code,
