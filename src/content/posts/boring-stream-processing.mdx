@@ -59,7 +59,10 @@ input:
   label: generate_greeting
   generate:
     mapping: |
-      root = {"id": nanoid(), "ts": now(), "message": "Hello, Blobs!"}
+      root = {
+        "uid": nanoid(),
+        "name": fake("first_name"),
+      }
     interval: 1s
 
 output:
@@ -67,7 +70,7 @@ output:
   stdout: {}
 ```
 
-If you write that to a file, called `config.yml`, and run the following command then you'll see lines of JSON printed to your terminal:
+If you write that to a file called `config.yml` and run the following command, then you'll see lines of JSON printed to your terminal:
 
 ```
 benthos -c config.yml
@@ -84,7 +87,77 @@ INFO Launching a benthos instance, use CTRL+C to close  @service=benthos
 
 While that's running, fetch http://localhost:4195/metrics using your browser or `curl` and notice how Benthos is producing [Prometheus][prometheus] metrics for each stage of the pipeline[^2].
 
-That's not a very interesting demo. Let's look at another example where we take messages from a PubSub topic, enrich them using a
+Let's look at a more elaborate example:
+
+> Take messages from a PubSub topic, format their timestamps to RFC3339, batch these up into a JSON array of 200 entries and POST them to an HTTP endpoint with a rate limit.
+
+```yaml
+input:
+  gcp_pubsub:
+    project: demo-gcp-project
+    subscription: demo-pubsub-subscription
+
+# Let's imagine messages coming from the topic have this format:
+# {
+#   "id": "abc123"
+#   "ts": 1682852776
+#   "event": "payment_processed",
+#   "actor": "acme://merchants/12fa4", 
+#   "subject": "acme://payments/ae1342",
+#   "data": {"amount": "28.99","currency":"usd"}
+# }
+
+pipeline:
+  processors:
+    mapping: |
+      # 1. cherry-pick what we want from the pubsub message
+      root = this.with("id", "event", "actor", "subject")
+
+      # 2. format the timestamp
+      root.ts = this.ts.format("2006-01-02T15:04:05Z07:00")
+
+      # 3. set the value field from data in the message
+      root.value = this.data.amount
+
+      # 4. derive the product code
+      let event = this.event
+      let currency = this.data.currency
+      root.product_code = match this.event {
+        "payment_processed" => "payment_" + $currency
+        "payment_chargedback" => "chargeback_" + $currency
+        _ => "unknown"
+      }
+
+output:
+  http_client:
+    url: "https://api.example.com/billing/usage"
+    method: POST
+    oauth2:
+      enabled: true
+      client_key: "${API_CLIENT_KEY}"
+      client_secret: "${API_CLIENT_SECRET}"
+      token_url: "https://api.example.com/oauth/token"
+    rate_limit: api_rate_limiter
+    batching:
+      count: 200
+      period: 5s
+      processors: # This series of processors runs when a batch is cut
+        - label: collapse_batch
+          archive:
+            format: json_array
+        - label: add_envelope
+          mapping: |
+            root = {}
+            root.events = this
+
+rate_limit_resources:
+  - label: api_rate_limiter
+    redis:
+      url: "tcp://localhost:6397"
+      count: 50
+      interval: 1s
+      key: events_api
+```
 
 [^1]: I think learning these concepts is essential but doing so within the context of ongoing projects meant that exposure to them was not always guaranteed.
 [^2]: There are two flags you can enable to get Benthos to emit process-level metrics and Go metrics. Check the configuration options for the prometheus metrics exporter [here](https://www.benthos.dev/docs/components/metrics/prometheus).
