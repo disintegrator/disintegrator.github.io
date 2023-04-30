@@ -1,0 +1,98 @@
+---
+title: "Benthos: Stream processing… but make it boring"
+summary: The story of how I came to use Benthos to solve a bunch of stream processing problems.
+publishDate: "2023-04-29"
+draft: true
+---
+
+import hero from "../../images/mj-benthos-blobfish.jpg";
+
+<HeroImage src={hero} alt="">
+	Midjourney prompt: a photo of a blobfish, staring straight on, looking sad,
+	two big eyes, large mouth, on seafloor --ar 16:9
+</HeroImage>
+
+_If you'll indulge me for a few minutes, I'll tell you the story of a how a sad-looking blobfish ended up solving our stream processing problems._
+
+About a year and a half ago, I was watching the proliferation of stream processing use cases at GoCardless while also trying to tackle the problem of building usage-based billing for our products with my team. It seemed that at every turn someone had some use case for which they built some bespoke piece of Ruby or Go code to solve. The general premise usually involved taking data from webhooks or a [Google Cloud Pub/Sub topic][pubsub], transforming it and publishing it to another topic, batching it up and storing in a [bucket][storage] or sending it to another service over HTTP.
+
+As many folks might imagine the various solutions in place differed in performance and operational characteristics. Some stream processors ran well enough for specific use cases while others suffered from poor throughput. Most of them were not well-instrumented which meant getting useful insights required a bit of effort. On top of that, a number of teams working on stream processing problems often have to learn and relearn the same lessons about at-least-once processing, failure recovery, maintainability and observability so they can incorporate them into their work[^1]. Naturally, deadlines and shifting priorities meant that certain corners had to be cut which may lead to bugs and difficult-to-observe services.
+
+While teams working on web services enjoyed the many benefits of frameworks like Ruby on Rails, we were missing a valuable golden path that allowed teams to build robust and production-ready stream processors. This presented a great opportunity to go out and search for something that meets our needs.
+
+## Going over requirements
+
+What do we need from a stream processing tool? In no particular order, here's a non-exhaustive list of requirements I had in mind:
+
+- It must integrate with the various data sources and sinks that we rely on at GoCardless. That is, it's got to have a good number of batteries included.
+- It must provide a way to transform and enrich messages them by looking up databases, caches and external HTTP services.
+- It must guarantee at-least-once processing or at least not erode that guarantee if our data source - for instance, Pub/Sub - allowed for it.
+- As a corollary to the previous poiint, it must retry failures, _by default_, until messages are successfully sent out. In other words, bailing out of a failure must be specified explicitly in code.
+- It must propagate backpressure so that the rate of processing and outputting messages dictates the rate at which new message are taken from data sources. Failing to do that could result in degraded performance and, likely, out-of-memory errors.
+- It must have provide flow control features like batching messages and adding rate limits. For example, writing a batch of messages to a database yields better throughput than writing one message at a time. Being polite to downstream services, such as third-party APIs, is also necessary.
+- It must automatically instrument the stream processing pipeline with metrics and traces (and logs if you want that).
+- It must promote building testable stream processing pipelines and transformation logic.
+
+I'm hoping that like me you consider many of these requirements "table stakes" for potential frameworks or tools. I want to talk about one more requirement:
+
+- It must be easy-to-operate and stateless so that it may be scaled effortlessly. Ideally, it's as simple as shipping a binary in a container.
+
+This is where I confess to you that, despite the abundance, I cannot bring myself to use most of the software from the Apache foundation and CNCF. These two ecosystems provide several solutions for stream processing and yet:
+
+- Many popular choices are built in Java (at least in the case of Apache foundation projects) which I and most of my teammates have little-or-no experience using. We are a Ruby, Go and TypeScript shop.
+- They require deploying stateful clusters often comprised of manager and worker nodes and a key-value store with distributed locking features (e.g. ZooKeeper or etcd). The operational burden they present had always seemed insurmountable.
+
+I do not think any of these tools are bad and do not intend to present my (in)experience as a case against them. Tools that require significant operational investment can be difficult to introduce especially in smaller teams.
+
+## I know I've seen something that does this
+
+I'm grateful to my past self for regularly browsing [GitHub's Trending page][gh-trending] and starring projects along the way. I also tend to dig through [Hacker News' history][hn-search] for a particular topic trying to gather leads for research. One project I tagged a long time ago was [Benthos][benthos]. I recalled seeing the Hacker News post about this project 5 years ago and giggling at its _marketing_ but at the same time deeply appreciating the pitch: "fancy stream processing made operationally mundane". I don't know about you but that's a good tagline if you ask me.
+
+Here's the elevator pitch from a devoted user: Benthos is a stream processing tool distributed as a single binary that goes out of its way to make it easy to build and operate reliable, stateless stream processing pipeline with an emphasis on delivery guarantees, fault tolerance, observability and a broad catalog of integrations. It comes with a very convenient "mapping" language, called [Bloblang][bloblang], that can be used to transform message as they fly through the processing pipeline.
+
+## Less talking, more demos
+
+Benthos lets you describe a stream processing pipeline in YAML that you pass to the `benthos` binary. Here's a short, "hello world" example:
+
+```yaml
+input:
+  label: generate_greeting
+  generate:
+    mapping: |
+      root = {"id": nanoid(), "ts": now(), "message": "Hello, Blobs!"}
+    interval: 1s
+
+output:
+  label: print_to_console
+  stdout: {}
+```
+
+If you write that to a file, called `config.yml`, and run the following command then you'll see lines of JSON printed to your terminal:
+
+```
+benthos -c config.yml
+```
+
+```json
+INFO Running main config from specified file       @service=benthos path=config.yml
+INFO Listening for HTTP requests at: http://0.0.0.0:4195  @service=benthos
+INFO Launching a benthos instance, use CTRL+C to close  @service=benthos
+{"id":"Qxd7sOF_e3z7KWoWq2gbQ","message":"Hello, Blobs!","ts":"2023-04-29T22:59:55.177721+01:00"}
+{"id":"Zo_zHRPjTQFJxHOoj546X","message":"Hello, Blobs!","ts":"2023-04-29T22:59:56.177934+01:00"}
+{"id":"Lr-1aUXQsnXC2n8_I6KDP","message":"Hello, Blobs!","ts":"2023-04-29T22:59:57.1771+01:00"}
+```
+
+While that's running, fetch http://localhost:4195/metrics using your browser or `curl` and notice how Benthos is producing [Prometheus][prometheus] metrics for each stage of the pipeline[^2].
+
+That's not a very interesting demo. Let's look at another example where we take messages from a PubSub topic, enrich them using a
+
+[^1]: I think learning these concepts is essential but doing so within the context of ongoing projects meant that exposure to them was not always guaranteed.
+[^2]: There are two flags you can enable to get Benthos to emit process-level metrics and Go metrics. Check the configuration options for the prometheus metrics exporter [here](https://www.benthos.dev/docs/components/metrics/prometheus).
+
+[benthos]: https://www.benthos.dev/
+[bloblang]: https://www.benthos.dev/docs/guides/bloblang/about/
+[pubsub]: https://cloud.google.com/pubsub/
+[storage]: https://cloud.google.com/storage/
+[gh-trending]: https://github.com/trending
+[hn-search]: https://hn.algolia.com/?dateRange=all&page=0&prefix=true&query=benthos%20comments%3E10&sort=byPopularity&type=story
+[prometheus]: https://prometheus.io/
