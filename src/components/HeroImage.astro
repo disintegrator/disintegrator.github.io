@@ -1,10 +1,11 @@
 ---
-import {
-	Picture,
-	PictureComponentLocalImageProps,
-} from "@astrojs/image/components";
+import { Picture, LocalImageProps } from "astro:assets";
 
-type Props = Omit<PictureComponentLocalImageProps, "slot"> & {
+type Props = {
+	src: LocalImageProps["src"];
+	alt: LocalImageProps["alt"];
+	widths?: LocalImageProps["widths"];
+	loading?: LocalImageProps["loading"];
 	children?: unknown;
 };
 

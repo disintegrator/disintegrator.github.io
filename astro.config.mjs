@@ -1,10 +1,9 @@
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
 import mdx from "@astrojs/mdx";
-import image from "@astrojs/image";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
-import { autolinkConfig } from "./src/config/autolink";
+import { autolinkConfig } from "./src/config/autolink.ts";
 
 export default defineConfig({
 	site: "https://blog.disintegrator.dev",
@@ -15,7 +14,6 @@ export default defineConfig({
 			},
 		}),
 		mdx(),
-		image({ serviceEntryPoint: "@astrojs/image/sharp" }),
 	],
 	markdown: {
 		shikiConfig: { theme: "css-variables" },

@@ -1,0 +1,47 @@
+---
+import { Picture, getImage } from "astro:assets";
+import bluesky from "../images/bluesky.svg";
+import linkedin from "../images/linkedin.svg";
+
+const xdark = await getImage({ src: import("../images/x-dark.svg") });
+const xlight = await getImage({ src: import("../images/x-light.svg") });
+const ghdark = await getImage({ src: import("../images/github-dark.svg") });
+const ghlight = await getImage({ src: import("../images/github-light.svg") });
+---
+
+<ul class="flex gap-4 items-center">
+	<li class="w-8">
+		<a
+			href="https://bsky.app/profile/disintegrator.dev"
+			title="disintegrator.dev on Bluesky"
+		>
+			<Picture src={bluesky} alt="Bluesky logo" />
+		</a>
+	</li>
+	<li class="w-8">
+		<a href="https://x.com/ghaidar0" title="ghaidar0 on X">
+			<picture>
+				<source srcset={xdark.src} media="(prefers-color-scheme: dark)" />
+				<source srcset={xlight.src} media="(prefers-color-scheme: light)" />
+				<img src={xlight.src} alt="X / Twitter logo" />
+			</picture>
+		</a>
+	</li>
+	<li class="w-8">
+		<a
+			href="https://www.linkedin.com/in/georges-haidar-a9314123/"
+			title="Georges Haidar on LinkedIn"
+		>
+			<Picture src={linkedin} alt="LinkedIn logo" />
+		</a>
+	</li>
+	<li class="w-8">
+		<a href="https://github.com/disintegrator" title="disintegrator on GitHub">
+			<picture>
+				<source srcset={ghdark.src} media="(prefers-color-scheme: dark)" />
+				<source srcset={ghlight.src} media="(prefers-color-scheme: light)" />
+				<img src={ghlight.src} alt="GitHub logo" />
+			</picture>
+		</a>
+	</li>
+</ul>

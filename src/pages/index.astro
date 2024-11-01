@@ -1,10 +1,21 @@
 ---
-import { Image } from "@astrojs/image/components";
+import { Image } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
 
 import { getCollection } from "astro:content";
 import Link from "../components/Link.astro";
 import H1 from "../components/H1.astro";
+
+import profileImage from "../images/profile.jpg";
+import Socials from "../components/Socials.astro";
+import { getImage } from "astro:assets";
+
+const speakeasydark = await getImage({
+	src: import("../images/speakeasy-dark.svg"),
+});
+const speakeasylight = await getImage({
+	src: import("../images/speakeasy-light.svg"),
+});
 
 let posts = await getCollection("posts");
 posts = posts
@@ -23,17 +34,31 @@ posts = posts
 			class="flex flex-col gap-4 mb-6 p-6 border-b border-dotted border-orange-400 text-center md:text-start items-center md:items-start"
 		>
 			<div>
-				<Image
-					class="rounded-full"
-					width={150}
-					aspectRatio={1}
-					src={import("../images/profile.jpg")}
-					alt=""
-				/>
+				<Image class="rounded-full" width={150} src={profileImage} alt="" />
 			</div>
 			<p class="text-xl">
 				Hi there, I'm Georges.<br />
 				Australian software engineer based in London.
+			</p>
+			<Socials />
+			<p class="mt-4">
+				Currently shipping code at <a href="https://speakeasy.com">
+					<picture>
+						<source
+							srcset={speakeasydark.src}
+							media="(prefers-color-scheme: dark)"
+						/>
+						<source
+							srcset={speakeasylight.src}
+							media="(prefers-color-scheme: light)"
+						/>
+						<img
+							class="inline-block h-3 w-auto align-baseline"
+							src={speakeasylight.src}
+							alt="Speakeasy"
+						/>
+					</picture>
+				</a>
 			</p>
 		</header>
 		<nav class="p-6" aria-labelledby="latest-posts">
