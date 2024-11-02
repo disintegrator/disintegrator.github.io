@@ -7,18 +7,32 @@ const xdark = await getImage({ src: import("../images/x-dark.svg") });
 const xlight = await getImage({ src: import("../images/x-light.svg") });
 const ghdark = await getImage({ src: import("../images/github-dark.svg") });
 const ghlight = await getImage({ src: import("../images/github-light.svg") });
+
+export type Props = {
+	size?: "4" | "6" | "8";
+};
+
+const { size = "8" } = Astro.props as Props;
+
+const sizeClass =
+	{
+		"4": "w-4",
+		"6": "w-6",
+		"8": "w-8",
+	}[size] || "w-8";
 ---
 
-<ul class="flex gap-4 items-center">
-	<li class="w-8">
-		<a
-			href="https://bsky.app/profile/disintegrator.dev"
-			title="disintegrator.dev on Bluesky"
-		>
-			<Picture src={bluesky} alt="Bluesky logo" />
+<ul class="inline-flex gap-4 items-center">
+	<li class={sizeClass}>
+		<a href="https://github.com/disintegrator" title="disintegrator on GitHub">
+			<picture>
+				<source srcset={ghdark.src} media="(prefers-color-scheme: dark)" />
+				<source srcset={ghlight.src} media="(prefers-color-scheme: light)" />
+				<img src={ghlight.src} alt="GitHub logo" />
+			</picture>
 		</a>
 	</li>
-	<li class="w-8">
+	<li class={sizeClass}>
 		<a href="https://x.com/ghaidar0" title="ghaidar0 on X">
 			<picture>
 				<source srcset={xdark.src} media="(prefers-color-scheme: dark)" />
@@ -27,21 +41,20 @@ const ghlight = await getImage({ src: import("../images/github-light.svg") });
 			</picture>
 		</a>
 	</li>
-	<li class="w-8">
+	<li class={sizeClass}>
+		<a
+			href="https://bsky.app/profile/disintegrator.dev"
+			title="disintegrator.dev on Bluesky"
+		>
+			<Picture src={bluesky} alt="Bluesky logo" />
+		</a>
+	</li>
+	<li class={sizeClass}>
 		<a
 			href="https://www.linkedin.com/in/georges-haidar-a9314123/"
 			title="Georges Haidar on LinkedIn"
 		>
 			<Picture src={linkedin} alt="LinkedIn logo" />
-		</a>
-	</li>
-	<li class="w-8">
-		<a href="https://github.com/disintegrator" title="disintegrator on GitHub">
-			<picture>
-				<source srcset={ghdark.src} media="(prefers-color-scheme: dark)" />
-				<source srcset={ghlight.src} media="(prefers-color-scheme: light)" />
-				<img src={ghlight.src} alt="GitHub logo" />
-			</picture>
 		</a>
 	</li>
 </ul>

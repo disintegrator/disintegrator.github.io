@@ -1,23 +1,18 @@
 ---
 import Link from "./Link.astro";
+import Socials from "./Socials.astro";
 ---
 
 <nav class="lg:text-right" aria-labelledby="site-nav-title">
 	<span id="site-nav-title" class="sr-only">Site navigation</span>
-	<h2 class="font-light text-xl lg:text-2xl lg:mb-4">Georges Haidar</h2>
-	<ul
-		class="font-extralight text-base lg:text-xl grid gap-2 grid-flow-col auto-cols-max lg:grid-flow-row lg:justify-end"
-	>
-		<li>
-			<Link href="/">Home</Link>
-		</li>
-		<li>
-			<Link href="https://twitter.com/ghaidar0">Twitter</Link>
-		</li>
-		<li>
-			<Link href="https://www.linkedin.com/in/georges-haidar-a9314123/">
-				LinkedIn
-			</Link>
-		</li>
-	</ul>
+	<h2 class="font-light text-xl lg:text-2xl mb-2 lg:mb-4">
+		<Link
+			class="text-inherit dark:text-inherit hover:text-inherit dark:hover:text-inherit hover:cursor-pointer"
+		>
+			Georges Haidar
+		</Link>
+	</h2>
+	<div>
+		<Socials size="6" />
+	</div>
 </nav>

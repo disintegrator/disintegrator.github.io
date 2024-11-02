@@ -1,5 +1,6 @@
 ---
 import type { HTMLAttributes } from "astro/types";
+import { cn } from "../lib/cn";
 
 type Props = HTMLAttributes<"a">;
 const {
@@ -11,13 +12,13 @@ const {
 
 <a
 	{...rest}
-	class:list={[
+	class:list={cn(
 		"hover:underline",
 		"text-orange-700 dark:text-orange-400",
 		"hover:text-orange-600 dark:hover:text-orange-300",
 		className,
 		classList,
-	]}
+	)}
 >
 	<slot />
 </a>
