@@ -18,6 +18,7 @@ import TableOfContents from "../components/TableOfContents.astro";
 import SiteNav from "../components/SiteNav.astro";
 import Code from "../components/Code.astro";
 import HR from "../components/HR.astro";
+import ImageLink from "../components/ImageLink.astro";
 
 export interface Props extends Omit<LayoutProps, "title" | "description"> {
 	entry: CollectionEntry<"posts">;
@@ -50,7 +51,7 @@ const tocTree = generateTableOfContents(headings);
 			<SiteNav />
 		</div>
 		<div class="col-span-full lg:col-span-6 xl:col-span-8">
-			<article class="mx-auto lg:mx-0 max-w-2xl p-6">
+			<article class="mx-auto lg:mx-0 max-w-prose p-6">
 				<H1>{entry.data.title}</H1>
 				<Content
 					components={{
@@ -64,6 +65,7 @@ const tocTree = generateTableOfContents(headings);
 						hr: HR,
 						code: Code,
 						HeroImage,
+						ImageLink,
 						Image,
 						Link,
 						Tip,

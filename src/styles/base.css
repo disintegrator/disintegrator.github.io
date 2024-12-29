@@ -40,3 +40,13 @@
 .footnotes {
 	@apply text-sm border-t dark:border-neutral-600 pt-4;
 }
+
+body {
+	&:has(dialog[open]) {
+		overflow: hidden;
+	}
+}
+
+html {
+	scrollbar-gutter: stable;
+}

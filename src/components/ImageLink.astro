@@ -1,0 +1,63 @@
+---
+import { Picture, LocalImageProps } from "astro:assets";
+import CloseIcon from "./icons/CloseIcon.astro";
+
+type Props = {
+	src: ImageMetadata;
+	alt: LocalImageProps["alt"];
+	widths?: LocalImageProps["widths"];
+	loading?: LocalImageProps["loading"];
+	children?: unknown;
+};
+
+const {
+	children,
+	loading = "eager",
+	widths = [1280],
+	src,
+	alt,
+	...imageProps
+} = Astro.props as Props;
+---
+
+<div class="js-imagelink mt-4 mb-8">
+	<dialog class="my-4 bg-transparent text-current">
+		<div class="relative">
+			<form method="dialog">
+				<button type="submit" class="absolute top-0 right-0 p-2">
+					<CloseIcon />
+					<span class="sr-only">Close</span>
+				</button>
+			</form>
+			<img src={src.src} alt={alt} class="block max-h-[calc(100vh-3rem)]" />
+		</div>
+	</dialog>
+	<a class="js-imagelink" href={src.src}>
+		<Picture
+			widths={widths}
+			loading={loading}
+			src={src}
+			alt={alt}
+			{...imageProps}
+		/>
+	</a>
+</div>
+<script>
+	const roots = document.querySelectorAll(".js-imagelink");
+	roots.forEach((root) => {
+		const link = root.querySelector(":scope > a");
+		const dialog = root.querySelector(":scope > dialog");
+		if (
+			!(
+				link instanceof HTMLAnchorElement && dialog instanceof HTMLDialogElement
+			)
+		) {
+			return;
+		}
+
+		link.addEventListener("click", (e) => {
+			e.preventDefault();
+			dialog.showModal();
+		});
+	});
+</script>
