@@ -28,7 +28,7 @@ import vscExt from "../../images/vscode-extensions.png";
 
 <ImageLink src={vscExt} alt="A screenshot of VS Code showing most extensions installed and running inside the VM" /> 
 
-Going back to iTerm2, I use the tmux integration which maps windows and pans to the native GUI. It's such a smooth experience to working with tmux using keyboard shortcuts I'm familiar with (⌘T for new tabs and ⌘D / ⌘⇧D for horizontal / vertical splits).
+Going back to iTerm2, I use the tmux integration which maps windows and panes to the native GUI. It's such a smooth experience to working with tmux using keyboard shortcuts I'm familiar with (⌘T for new tabs and ⌘D / ⌘⇧D for horizontal / vertical splits).
 
 import tmuxIterm2 from "../../images/tmux-iterm2.png";
 
@@ -47,6 +47,14 @@ When I want to access TCP services in the VM, such as development servers and da
 The experience in macOS day-to-day is flawless. Nothing inside the VM can affect the performance of my overall system. I do not have any command-line tools installed on the host machine and no transitive dependencies of those to worry about compromising the host. All my development tools and editor extensions are sandboxed in a virtual machine boundary. It's not perfect security but a useful level of defense and I still use [Little Snitch](https://www.obdev.at/products/littlesnitch/index.html) pedantically to manage network access from various programs inside and outside the guest VM.
 
 So much of this setup is largely transparent. I minimise the VMWare window and never think about it running in the background. As I mentioned, I don't experience a performance hit inside the VM and if anything my overall system is very responsive even when heavy builds are running in the VM.
+
+### More on security
+
+The statement "it's not perfect security" is a little too vague. My current setup wasn't intended to be a fully isolated sandbox. Running VS Code on macOS and the extensions inside the VM does still present an attack vector through the extension system. An extension can break out to my macOS host through VS Code and the Microsoft team behind the editor has not actually made any explicit claims that remote development over SSH improves security posture. A fellow Hacker News reader/commenter, retsl, has written [a great article](https://lets.re/blog/vscode-remote-dev/) diving deeper into this topic which I would encourage you to read.
+
+VS Code, (neo)vim and any other extensible text editor are an attractive target for attackers because they can hide malicious code in extensions that appear to be useful and trustworthy. It might be a good idea to either disable automatic updates and opt-in to manually for extensions after reviewing or uninstall the ones you don't use frequently regardless of their apparent trustworthiness. My general recommendation to developers is to always be extra careful about what plugins/extensions you add to your favourite editor.
+
+I am fine with this setup given my requirements and running VS Code on macOS means I get a snappy UI with the native font rendering and retina display support that I love. It's still worth noting that there is a net positive since I have a lot of tools and code running inside the VM that is going to have a harder time breaking out of the VM boundary and taking over my system.
 
 ## The negatives
 
