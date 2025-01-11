@@ -1,0 +1,189 @@
+---
+title: What are those shell init commands?
+summary: … and why do all these CLI tools want to add them to your shell?
+publishDate: "2025-01-11"
+---
+
+I just looked at my `.zshrc` for all the custom stuff I added to it and I noticed the following lines:
+
+```sh
+eval "$(starship init zsh)"
+eval "$(zoxide init zsh)"
+eval "$(regolith init zsh)"
+eval "$(/home/disintegrator/.local/bin/mise activate zsh)"
+[ -s "/home/disintegrator/.bun/_bun" ] && source "/home/disintegrator/.bun/_bun"
+. "/home/disintegrator/.deno/env"
+```
+
+It seems like many tools have some requirement around augmenting your shell and environment in some way for them to do their job. Here is Deno's script for example:
+
+```sh
+#!/bin/sh
+# deno shell setup; adapted from rustup
+# affix colons on either side of $PATH to simplify matching
+case ":${PATH}:" in
+    *:"/home/disintegrator/.deno/bin":*)
+        ;;
+    *)
+        # Prepending path in case a system-installed deno
+        # executable needs to be overridden
+        export PATH="/home/disintegrator/.deno/bin:$PATH"
+        ;;
+esac
+```
+
+This one is fairly short and straightforward. It's checking to make sure the Deno CLI is available in `$PATH` and adding it if not so you can just run `deno` in your shell. More interestingly, many modern CLI tools bundle their init script as a subcommand in the CLI binary and use some form of `eval $(fancy-cli init your-shell)` as you may have noticed on the first 4 lines. Among other reasons, this preserves the ease-of-distribution feature of these tools as being a single binary that you place somewhere in your `$PATH` and they contain all the logic to run _and_ extend your shell with functionality.
+
+## Why do these exist?
+
+`zoxide` is a fanstastic utility that I cannot live without. It's a smarter `cd` that tracks frequently visited directories and makes it so you can jump to them with just a few characters. For example, running `z blog` (or even `z b`) would jump me to `$HOME/github.com/disintegrator/blog` if that's the most visited path for the given input characters.
+
+Try writing a Go program that `cd`s to your favourite folder:
+
+```go
+package main
+
+import (
+	"os"
+	"os/exec"
+)
+
+func main() {
+  // also try it with os.Chdir
+
+	cmd := exec.Command("zsh", "-c", "cd /home/disintegrator/github.com")
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	// // Also try it with os.Chdir
+	// if err := os.Chdir("/home/disintegrator/github.com"); err != nil {
+	// 	panic(err)
+	// }
+}
+```
+
+If you run this command in your current shell, nothing interesting happens and you might already know why. Your current shell is a process on your machine and this Go program starts up as a process and spins a new shell again as a process. That sub-shell's working directory changes but then its process terminates. That change will not propagate upwards to the parent processes which include your current shell process. So how can build a fancy CLI tool that does some work and `cd`s you to a directory? Or, in the case of `starship`, how do we build a tool that reads some data about your system and current directory and reflects it in your prompt?
+
+The broad stroke answer is that when you're building CLI tools in your favourite programming languages, you will need a small sidecar of a shell script, like the ones above in my `.zshrc`, that adds functions and aliases to your shell upon startup. This would supercharge your current shell and every other interactive shell you start up in your terminal.
+
+Since our program cannot drive the current shell, we need to change it to just feed us data and have functions in the current shell consume it. These functions are added to the current shell using an init script we'll build.
+
+## Making it work
+
+> I'm going to assume you're using Zsh or Bash and I'm going to skip over some more robust error handling which you normally want to have around. It should not be too hard to adapt this to your preferred shell.
+
+In our Go project, we'll update our `main.go` to look like this:
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+// You can also use go:embed to embed the init script from another file.
+const initZsh = `function __noisy_cd() {
+  local out
+  out=$(noisy cd "$@")
+
+  local ret=$?
+  if [ $ret -ne 0 ]; then
+    exit $ret
+  fi
+
+  cd -- "$out" || exit 1
+}
+
+alias noisy-cd=__noisy_cd`
+
+func main() {
+	if len(os.Args) < 2 {
+		panic("missing subcommand")
+	}
+
+	switch os.Args[1] {
+	case "zsh":
+		fmt.Println(initZsh)
+	case "cd":
+		if len(os.Args) < 3 {
+			panic("missing directory")
+		}
+
+		fmt.Fprintf(os.Stderr, "Going into %s\n", os.Args[2])
+
+		entries, err := os.ReadDir(os.Args[2])
+		if err != nil {
+			panic(err)
+		}
+
+		files := 0
+		for _, entry := range entries {
+			if entry.Type().IsRegular() {
+				files++
+			}
+		}
+		fmt.Fprintf(
+			os.Stderr,
+			"There are %d files in this directory\n",
+			files,
+		)
+
+		fmt.Print(os.Args[2])
+	default:
+		panic("unknown subcommand")
+	}
+}
+```
+
+Now we build our program:
+
+```sh
+go build -o ./bin/noisy
+export PATH="$PATH:$PWD/bin"
+# ^ This is just for demo purposes. Often, real CLI tools tend to be installed
+# in more common locations on your system that are typically present in $PATH.
+```
+
+Check out the output of these commands:
+
+```sh
+noisy zsh
+noisy cd "$HOME/downloads"
+# You'll need a directory path that exists on your system
+```
+
+Notice the final line of that second command is the path and notice how it's
+catpured by the shell script we embedded in our Go program. Let's make it work
+in our current shell by running:
+
+```sh
+eval "$(noisy zsh)"
+```
+
+Now you'll notice you have a new command (read: alias):
+
+```sh
+noisy-cd "$HOME/downloads"
+```
+
+You should hopefully see something like this:
+
+```
+~/code/scratch/gocd $ noisy-cd $HOME/downloads
+Going into /home/disintegrator/downloads
+There are 9 files in this directory
+
+~/downloads $ 
+```
+
+_(Note that your shell prompt might look different than mine.)_
+
+What's going on here is that the Go program is printing some interesting content to `STDERR` and then printing the destination directory to `STDOUT`. The `eval` we ran is injecting a `__noisy_cd` function with a nicer alias to it _into the current shell_. That function is capturing `STDOUT` and then feeding it to `cd` but the difference is this is happening in the current shell and not in a sub-shell. That's why we see the directory change after the command completes.
+
+## Wrapping up
+
+I've been getting into building my own personal CLI to help me be more productive and as a way to learn more Rust (though I still love Go!). I needed to work out how to properly integrate it into my shell and give it extra powers. It's mostly what you've seen so far with bit more hardening which I'm sure you'll figure out.
