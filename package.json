@@ -15,6 +15,8 @@
 		"@astrojs/mdx": "^4.0.5",
 		"@astrojs/tailwind": "^5.1.4",
 		"@types/html-escaper": "^3.0.2",
+		"@types/node": "^22.10.5",
+		"@types/react": "^19.0.4",
 		"astro": "^5.1.5",
 		"hast-util-to-string": "^3.0.1",
 		"hastscript": "^9.0.0",
@@ -30,6 +32,8 @@
 	"dependencies": {
 		"@astrojs/check": "^0.9.4",
 		"clsx": "^2.1.1",
+		"react": "^19.0.0",
+		"satori": "^0.12.1",
 		"tailwind-merge": "^2.6.0"
 	}
 }

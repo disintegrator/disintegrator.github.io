@@ -27,6 +27,7 @@ const {
 		<link rel="icon" type="image/jpeg" href="/favicon.jpg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}{titleQualifier}</title>
+		<slot name="head" />
 	</head>
 	<body class="antialiased text-zinc-800 dark:bg-zinc-900 dark:text-zinc-50">
 		<slot />

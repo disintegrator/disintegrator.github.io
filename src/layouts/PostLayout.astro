@@ -22,14 +22,20 @@ import ImageLink from "../components/ImageLink.astro";
 
 export interface Props extends Omit<LayoutProps, "title" | "description"> {
 	entry: CollectionEntry<"posts">;
+	ogImage: string | null;
 }
 
-const { entry, ...rest } = Astro.props as Props;
+const { entry, ogImage, ...rest } = Astro.props as Props;
 const { Content, headings } = await entry.render();
 const tocTree = generateTableOfContents(headings);
 ---
 
 <Layout {...rest} title={entry.data.title} description={entry.data.summary}>
+	<meta slot="head" name="og:title" content={entry.data.title} />
+	<meta slot="head" name="og:description" content={entry.data.summary} />
+	<meta slot="head" name="og:type" content="article" />
+	<meta slot="head" name="og:site_name" content="Blog | Georges Haidar" />
+	{ogImage ? <meta slot="head" name="og:image" content={ogImage} /> : null}
 	<div class="sr-only" id="back-to-top">Top of page</div>
 	<div
 		class:list={[
