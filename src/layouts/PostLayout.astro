@@ -31,11 +31,11 @@ const tocTree = generateTableOfContents(headings);
 ---
 
 <Layout {...rest} title={entry.data.title} description={entry.data.summary}>
-	<meta slot="head" name="og:title" content={entry.data.title} />
-	<meta slot="head" name="og:description" content={entry.data.summary} />
-	<meta slot="head" name="og:type" content="article" />
-	<meta slot="head" name="og:site_name" content="Blog | Georges Haidar" />
-	{ogImage ? <meta slot="head" name="og:image" content={ogImage} /> : null}
+	<meta slot="head" property="og:title" content={entry.data.title} />
+	{ogImage ? <meta slot="head" property="og:image" content={ogImage} /> : null}
+	<meta slot="head" property="og:description" content={entry.data.summary} />
+	<meta slot="head" property="og:type" content="article" />
+	<meta slot="head" property="og:site_name" content="Blog | Georges Haidar" />
 	<div class="sr-only" id="back-to-top">Top of page</div>
 	<div
 		class:list={[

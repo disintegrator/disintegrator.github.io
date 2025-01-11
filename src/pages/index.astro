@@ -39,7 +39,7 @@ const ogImage = site ? `${site}/og/home.png` : null;
 		content="Hi I'm Georges and this is an attempt at writing about what I do and the things I care about."
 	/>
 	<meta name="og:type" content="website" />
-	{ogImage ? <meta name="og:image" content={ogImage} /> : null}
+	{ogImage ? <meta property="og:image" content={ogImage} /> : null}
 	<main>
 		<header
 			class="flex flex-col gap-4 mb-6 p-6 border-b border-dotted border-orange-400 text-center md:text-start items-center md:items-start"
