@@ -32,14 +32,22 @@ const ogImage = site ? `${site}/og/home.png` : null;
 	title="Blog"
 	description="Hi I'm Georges and this is an attempt at writing about what I do and the things I care about."
 >
-	<meta name="og:title" content="Blog | Georges Haidar" />
-	<meta name="og:site_name" content="Blog | Georges Haidar" />
+	<meta slot="head" name="og:title" content="Home" />
+	<meta slot="head" name="twitter:title" content="Home" />
+	<meta slot="head" name="twitter:site" content="@ghaidar0" />
 	<meta
+		slot="head"
 		name="og:description"
 		content="Hi I'm Georges and this is an attempt at writing about what I do and the things I care about."
 	/>
-	<meta name="og:type" content="website" />
-	{ogImage ? <meta property="og:image" content={ogImage} /> : null}
+	<meta slot="head" name="og:type" content="website" />
+	{
+		ogImage ? (
+			<meta slot="head" name="twitter:card" content="summary_large_image" />
+		) : null
+	}
+	{ogImage ? <meta slot="head" property="og:image" content={ogImage} /> : null}
+
 	<main>
 		<header
 			class="flex flex-col gap-4 mb-6 p-6 border-b border-dotted border-orange-400 text-center md:text-start items-center md:items-start"
