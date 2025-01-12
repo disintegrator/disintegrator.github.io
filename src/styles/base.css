@@ -19,6 +19,8 @@
 
 @media (prefers-color-scheme: dark) {
 	:root {
+		color-scheme: dark;
+
 		--astro-code-background: theme(colors.neutral.900);
 		--astro-code-color-text: theme(colors.zinc.50);
 		--astro-code-color-background: theme(colors.neutral.800);
