@@ -3,7 +3,10 @@ import { jsx } from "react/jsx-runtime";
 import satori from "satori";
 import sharp from "sharp";
 
-const fontData = await fs.readFile("./public/fonts/InterDisplay-Regular.otf");
+const regularFont = await fs.readFile(
+	"./public/fonts/InterDisplay-Regular.otf",
+);
+const boldFont = await fs.readFile("./public/fonts/InterDisplay-Bold.otf");
 
 export async function renderOGImage(title: string, summary: string) {
 	const svg = await satori(
@@ -15,7 +18,7 @@ export async function renderOGImage(title: string, summary: string) {
 				alignItems: "center",
 				justifyContent: "center",
 				flexDirection: "column",
-				backgroundImage: "linear-gradient(to top, #cffafe, #ffffff)",
+				backgroundImage: "linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)",
 				letterSpacing: -1,
 				textAlign: "center",
 				color: "black",
@@ -25,7 +28,12 @@ export async function renderOGImage(title: string, summary: string) {
 					"div",
 					{
 						style: {
+							backgroundImage:
+								"linear-gradient(-225deg, #A445B2 0%, #D41872 52%, #FF0066 100%)",
+							backgroundClip: "text",
+							color: "transparent",
 							fontSize: 48,
+							fontWeight: "bold",
 						},
 						children: title,
 					},
@@ -49,8 +57,14 @@ export async function renderOGImage(title: string, summary: string) {
 			fonts: [
 				{
 					name: "Inter",
-					data: fontData,
+					data: regularFont,
 					weight: 400,
+					style: "normal",
+				},
+				{
+					name: "Inter",
+					data: boldFont,
+					weight: 700,
 					style: "normal",
 				},
 			],
