@@ -34,6 +34,7 @@ export async function renderOGImage(title: string, summary: string) {
 							color: "transparent",
 							fontSize: 48,
 							fontWeight: "bold",
+							marginBottom: "16px",
 						},
 						children: title,
 					},
