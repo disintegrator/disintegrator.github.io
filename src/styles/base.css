@@ -2,43 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-	--astro-code-background: theme(colors.stone.100);
-	--astro-code-color-text: theme(colors.zinc.900);
-	--astro-code-color-background: theme(colors.neutral.100);
-	--astro-code-token-constant: theme(colors.teal.500);
-	--astro-code-token-string: theme(colors.zinc.900);
-	--astro-code-token-comment: theme(colors.zinc.600);
-	--astro-code-token-keyword: theme(colors.red.600);
-	--astro-code-token-parameter: theme(colors.rose.500);
-	--astro-code-token-function: theme(colors.pink.600);
-	--astro-code-token-string-expression: theme(colors.green.700);
-	--astro-code-token-punctuation: theme(colors.zinc.900);
-	--astro-code-token-link: theme(colors.indigo.500);
-}
-
 @media (prefers-color-scheme: dark) {
 	:root {
 		color-scheme: dark;
-
-		--astro-code-background: theme(colors.neutral.900);
-		--astro-code-color-text: theme(colors.zinc.50);
-		--astro-code-color-background: theme(colors.neutral.800);
-		--astro-code-token-constant: theme(colors.yellow.300);
-		--astro-code-token-string: theme(colors.zinc.50);
-		--astro-code-token-comment: theme(colors.zinc.400);
-		--astro-code-token-keyword: theme(colors.red.200);
-		--astro-code-token-parameter: theme(colors.rose.500);
-		--astro-code-token-function: theme(colors.pink.500);
-		--astro-code-token-string-expression: theme(colors.lime.500);
-		--astro-code-token-punctuation: theme(colors.zinc.50);
-		--astro-code-token-link: theme(colors.indigo.500);
 	}
 }
 
 .astro-code {
 	padding: theme(padding.4);
 	margin-bottom: theme(margin.4);
+}
+
+.expressive-code {
+	@apply mb-4;
 }
 
 .footnotes {

@@ -5,6 +5,8 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import { autolinkConfig } from "./src/config/autolink.ts";
 
+import expressiveCode from "astro-expressive-code";
+
 export default defineConfig({
 	site: "https://blog.disintegrator.dev",
 	integrations: [
@@ -12,6 +14,9 @@ export default defineConfig({
 			config: {
 				applyBaseStyles: false,
 			},
+		}),
+		expressiveCode({
+			themes: ["github-dark-default", "everforest-light"],
 		}),
 		mdx(),
 	],
