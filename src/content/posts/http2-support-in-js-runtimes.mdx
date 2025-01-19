@@ -1,0 +1,172 @@
+---
+title: Fetch and HTTP/2 support in Node.js, Bun and Deno
+summary: It's a mixed bag
+publishDate: "2025-01-19"
+---
+
+[speakeasy]: https://www.speakeasy.com/
+[mdn-fetch]: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+[whatwg-fetch]: https://fetch.spec.whatwg.org/
+[mkcert]: https://github.com/FiloSottile/mkcert
+[undici]: https://undici.nodejs.org/
+[bun-http2-issue]: https://github.com/oven-sh/bun/issues/7194
+[winter-tc]: https://wintercg.org
+
+Recently at [Speakeasy][speakeasy], we received a report that a user was unable to hit an HTTP/2 endpoint from the TypeScript SDK they generated with our code generator. I was a little surprised because I didn't think this was going to be a problem. Our SDKs are built using the [Web Fetch API][mdn-fetch] and avoid using any non-standard polyfills like `node-fetch` or similar packages. The [Fetch Standard][whatwg-fetch] is very much written with HTTP/2 in mind and it's easy to think this would be table stakes. On the popular, everygreen browsers, you can open the network tab in developer tools on many sites that use `fetch` for API calls and often observe these happening over HTTP/2.
+
+import devtoolsFetchH2 from "../../images/devtools-fetch-http2.png";
+
+<ImageLink src={devtoolsFetchH2} alt="A screenshot of Chrome developer tools showing the network tab with fetch requests using the h2 protocol" /> 
+
+Of course, the situation with backend JavaScript is rather different. With a small test setup I found that Node.js, Bun and Deno have varying support which may either be opt-in or outright unavailable.
+
+## The test setup
+
+Probably the strangest thing from the user's bug report was that the server they were connecting to did not allow HTTP/1.1 clients. This was a novel setup since many server frameworks, proxies and CDNs seamlessly support HTTP/2 with backwards compatibility for HTTP/1.1. It's not something you think about unless perhaps you're running a file upload or streaming service where things like request body streaming are central concerns.
+
+In order to reproduce the issue, I decided to create a Golang server with a simple handler that responded with an error when it received requests from HTTP/1.1 clients. I also used [mkcert][mkcert] to generate a self-signed certificate for the server.
+
+```go title="http2-server.go"
+package main
+
+import (
+	"fmt"
+	"log/slog"
+	"net/http"
+)
+
+func main() {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /greet", func(w http.ResponseWriter, r *http.Request) {
+		if r.ProtoMajor != 2 {
+			http.Error(w, "unsupport http protocol", http.StatusHTTPVersionNotSupported)
+			return
+		}
+
+		fmt.Fprintf(w, "Hello, world!")
+	})
+
+	server := &http.Server{
+		Addr:    ":8443",
+		Handler: mux,
+	}
+
+	slog.Info("starting server", slog.String("addr", server.Addr))
+	err := server.ListenAndServeTLS("cert.pem", "key.pem")
+	if err != nil {
+		slog.Error("server start error", slog.String("error", err.Error()))
+	}
+}
+```
+
+I confirmed that HTTP/2 was setup correctly with `curl`:
+
+```
+$ curl -v https://devbox.dev:8443/greet
+* Host devbox.dev:8443 was resolved.
+* IPv6: (none)
+* IPv4: 127.0.0.1
+*   Trying 127.0.0.1:8443...
+* Connected to devbox.dev (127.0.0.1) port 8443
+* ALPN: curl offers h2,http/1.1
+* ... TLS handshake omitted for brevity ...
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://devbox.dev:8443/greet
+* [HTTP/2] [1] [:method: GET]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: devbox.dev:8443]
+* [HTTP/2] [1] [:path: /greet]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+> GET /greet HTTP/2
+> Host: devbox.dev:8443
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/2 200 
+< content-type: text/plain; charset=utf-8
+< content-length: 13
+< date: Sun, 19 Jan 2025 13:55:52 GMT
+< 
+* Connection #0 to host devbox.dev left intact
+Hello, world!%
+```
+
+Finally, I created a simple script that I can run from Node.js, Bun and Deno:
+
+```js title="fetch-test.js"
+async function main() {
+	const response = await fetch("https://devbox.dev:8443/greet");
+	if (!response.ok) {
+		throw new Error(`Unexpected response: ${response.statusText}`);
+	}
+
+	const text = await response.text();
+	console.log(text);
+}
+
+await main();
+```
+
+```sh
+# Needed before running the following commands
+export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
+
+node fetch-test.js
+bun fetch-test.js
+deno run --allow-net --cert "$NODE_EXTRA_CA_CERTS" fetch-test.js
+```
+
+## Results
+
+### Node.js
+
+> Tested with Node.js v22.13.0
+
+The Fetch API is supported in Node.js through [Undici][undici], the official HTTP client that is built into Node.js since at least Node.js v18. Out of the box, Node.js throws an error:
+
+```
+Error: Unexpected response: HTTP Version Not Supported
+    at main (file:///scrubbed/fetch-test.js:4:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///scrubbed/fetch-test.js:11:1
+```
+
+There is a workaround for this which is to install `undici` as a dependency which exposes an option to enable HTTP/2 support:
+
+```diff title="fetch-test.js.diff"
++import { fetch, Agent } from "undici";
++
+ async function main() {
+-       const response = await fetch("https://devbox.dev:8443/greet");
++       const response = await fetch("https://devbox.dev:8443/greet", {
++               dispatcher: new Agent({ allowH2: true }),
++       });
+        if (!response.ok) {
+                throw new Error(`Unexpected response: ${response.statusText}`);
+        }
+```
+
+The modified script will run to completion and log `Hello, world!` to the console.
+
+### Deno
+
+> Tested with Deno v2.1.6
+
+Great news here! `fetch` in Deno natively supports HTTP/2 and running the original script worked seamlessly.
+
+### Bun
+
+> Tested with Bun v1.1.45
+
+Sadly, Bun does not appear to support HTTP/2 with its fetch implementation at this time and I don't believe there are great workarounds at this time. I tried testing it with `undici` without success. There is however an [open issue][bun-http2-issue] opened by the Jarred, creator of Bun, to add HTTP/2 support.
+
+## A moment to grieve
+
+As part of building a TypeScript SDK generator for my customers and their users, I spend a considerable amount of time surveying interoperability of JavaScript features across the browsers and backend runtimes. A few years ago, we could get away with writing Javascript/TypeScript code targetted squarely at Node.js and so if I'm building a library that made HTTP requests, I would solve my problem by installing Undici and configuring a client that enabled HTTP/2. Nowadays, the rising popularity of alternative runtimes makes it important to find a common ground between them if your goal is to build truly portable libraries. Despite the discrepencies, using platform APIs like the Fetch API is still your best bet for maximum interoperability. This is at least true if you intend for your code to also run on the browser.
+
+For some time now, I've been optimistic about [WinterTC][winter-tc], an initiative that aims to formally define interoperability across server-side JavaScript runtimes. One of the goals is to properly define the requirements for the Fetch API on the server. However, as a quiet observer, it seems that things are moving slower than expected but I remain optimistic knowing the folks involved with it.
+
+## Conclusion
+
+This particular example where a server is rejecting HTTP/1.1 clients is rather uncommon but it did present an opportunity to dig deeper into popular runtimes and test their internals. Web platform APIs present a great and positive incentive for all runtimes to get behind because it's a bridge for developers to migrate between them and to reach more users in the JS ecosystem.
