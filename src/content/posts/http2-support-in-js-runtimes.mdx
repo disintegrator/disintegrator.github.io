@@ -26,7 +26,7 @@ Probably the strangest thing from the user's bug report was that the server they
 
 In order to reproduce the issue, I decided to create a Golang server with a simple handler that responded with an error when it received requests from HTTP/1.1 clients. I also used [mkcert][mkcert] to generate a self-signed certificate for the server.
 
-```go title="http2-server.go"
+```go title="http2-server.go" {12-15}
 package main
 
 import (
@@ -39,7 +39,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /greet", func(w http.ResponseWriter, r *http.Request) {
 		if r.ProtoMajor != 2 {
-			http.Error(w, "unsupport http protocol", http.StatusHTTPVersionNotSupported)
+			http.Error(w, "unsupported http protocol", http.StatusHTTPVersionNotSupported)
 			return
 		}
 
@@ -61,7 +61,7 @@ func main() {
 
 I confirmed that HTTP/2 was setup correctly with `curl`:
 
-```txt title="curl-http2.txt" {7,9}
+```txt title="curl-http2.txt" {7,9,22,28}
 $ curl -v https://devbox.dev:8443/greet
 * Host devbox.dev:8443 was resolved.
 * IPv6: (none)
