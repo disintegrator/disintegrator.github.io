@@ -61,7 +61,7 @@ func main() {
 
 I confirmed that HTTP/2 was setup correctly with `curl`:
 
-```
+```txt title="curl-http2.txt" {7,9}
 $ curl -v https://devbox.dev:8443/greet
 * Host devbox.dev:8443 was resolved.
 * IPv6: (none)
@@ -108,7 +108,7 @@ async function main() {
 await main();
 ```
 
-```sh
+```sh title="test-script.sh"
 # Needed before running the following commands
 export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
 
@@ -125,7 +125,7 @@ deno run --allow-net --cert "$NODE_EXTRA_CA_CERTS" fetch-test.js
 
 The Fetch API is supported in Node.js through [Undici][undici], the official HTTP client that is built into Node.js since at least Node.js v18. Out of the box, Node.js throws an error:
 
-```
+```txt title="Node.js error"
 Error: Unexpected response: HTTP Version Not Supported
     at main (file:///scrubbed/fetch-test.js:4:9)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
@@ -134,7 +134,7 @@ Error: Unexpected response: HTTP Version Not Supported
 
 There is a workaround for this which is to install `undici` as a dependency which exposes an option to enable HTTP/2 support:
 
-```diff title="fetch-test.js.diff"
+```diff lang="js" title="fetch-test.js.diff"
 +import { fetch, Agent } from "undici";
 +
  async function main() {
