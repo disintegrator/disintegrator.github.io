@@ -12,7 +12,7 @@ publishDate: "2025-01-19"
 [bun-http2-issue]: https://github.com/oven-sh/bun/issues/7194
 [winter-tc]: https://wintercg.org
 
-Recently at [Speakeasy][speakeasy], we received a report that a user was unable to hit an HTTP/2 endpoint from the TypeScript SDK they generated with our code generator. I was a little surprised because I didn't think this was going to be a problem. Our SDKs are built using the [Web Fetch API][mdn-fetch] and avoid using any non-standard polyfills like `node-fetch` or similar packages. The [Fetch Standard][whatwg-fetch] is very much written with HTTP/2 in mind and it's easy to think this would be table stakes. On the popular, everygreen browsers, you can open the network tab in developer tools on many sites that use `fetch` for API calls and often observe these happening over HTTP/2.
+Recently at [Speakeasy][speakeasy], we received a report that a user was unable to hit an HTTP/2 endpoint from the TypeScript SDK they generated with our code generator. I was a little surprised because I didn't think this was going to be a problem. Our SDKs are built using the [Web Fetch API][mdn-fetch] and avoid using any non-standard polyfills like `node-fetch` or similar packages. The [Fetch Standard][whatwg-fetch] is very much written with HTTP/2 in mind and it's easy to think this would be table stakes. On the popular, evergreen browsers, you can open the network tab in developer tools on many sites that use `fetch` for API calls and often observe these happening over HTTP/2.
 
 import devtoolsFetchH2 from "../../images/devtools-fetch-http2.png";
 
@@ -123,7 +123,7 @@ deno run --allow-net --cert "$NODE_EXTRA_CA_CERTS" fetch-test.js
 
 > Tested with Node.js v22.13.0
 
-The Fetch API is supported in Node.js through [Undici][undici], the official HTTP client that is built into Node.js since at least Node.js v18. Out of the box, Node.js throws an error:
+The Fetch API is supported in Node.js through [Undici][undici], the official HTTP client that is built into the runtime since at least version 18. Out of the box, we get an error:
 
 ```txt title="Node.js error"
 Error: Unexpected response: HTTP Version Not Supported
