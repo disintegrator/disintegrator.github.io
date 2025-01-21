@@ -159,11 +159,11 @@ Great news here! `fetch` in Deno natively supports HTTP/2 and running the origin
 
 > Tested with Bun v1.1.45
 
-Sadly, Bun does not appear to support HTTP/2 with its fetch implementation at this time and I don't believe there are great workarounds at this time. I tried testing it with `undici` without success. There is however an [open issue][bun-http2-issue] opened by the Jarred, creator of Bun, to add HTTP/2 support.
+Sadly, Bun does not appear to support HTTP/2 with its fetch implementation at this time and I don't believe there are great workarounds at this time. I tried testing it with `undici` without success. There is however an [open issue][bun-http2-issue] opened by Jarred, creator of Bun, to add HTTP/2 support.
 
 ## A moment to grieve
 
-As part of building a TypeScript SDK generator for my customers and their users, I spend a considerable amount of time surveying interoperability of JavaScript features across the browsers and backend runtimes. A few years ago, we could get away with writing Javascript/TypeScript code targetted squarely at Node.js and so if I'm building a library that made HTTP requests, I would solve my problem by installing Undici and configuring a client that enabled HTTP/2. Nowadays, the rising popularity of alternative runtimes makes it important to find a common ground between them if your goal is to build truly portable libraries. Despite the discrepencies, using platform APIs like the Fetch API is still your best bet for maximum interoperability. This is at least true if you intend for your code to also run on the browser.
+As part of building a TypeScript SDK generator for my customers and their users, I spend a considerable amount of time surveying interoperability of JavaScript features across the browsers and backend runtimes. A few years ago, we could get away with writing Javascript or TypeScript code targetted squarely at Node.js and so if I'm building a library that made HTTP requests, I would solve my problem by installing Undici and configuring a client that enabled HTTP/2. Nowadays, the rising popularity of alternative runtimes makes it important to find a common ground between them if your goal is to build truly portable libraries. Despite the discrepencies, using platform APIs like the Fetch API is still your best bet for maximum interoperability. This is at least true if you intend for your code to also run on the browser.
 
 For some time now, I've been optimistic about [WinterTC][winter-tc], an initiative that aims to formally define interoperability across server-side JavaScript runtimes. One of the goals is to properly define the requirements for the Fetch API on the server and many runtime authors have backed it.
 
