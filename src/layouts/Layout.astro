@@ -22,6 +22,24 @@ const {
 	<head>
 		<meta charset="UTF-8" />
 		{noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}
+		<link
+			rel="preload"
+			href="/fonts/Inter-VariableFont.ttf"
+			as="font"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="preload"
+			href="/fonts/Inconsolata-VariableFont_wdth,wght.ttf"
+			as="font"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="preload"
+			href="/fonts/Inter-VariableFont-Italic.ttf"
+			as="font"
+			crossorigin="anonymous"
+		/>
 		<meta name="viewport" content="width=device-width" />
 		<meta name="description" content={description} />
 		<link rel="icon" type="image/jpeg" href="/favicon.jpg" />
