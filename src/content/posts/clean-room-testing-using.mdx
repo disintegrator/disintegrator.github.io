@@ -280,7 +280,7 @@ setup-action-assertion-teardown cycle. The result of following this principle is
 that you will quickly understand and fix or modify a broken test because all you
 need to parse is within the lexical scope of a `test("…", async () => { … })`
 callback. Historically, this principle was often violated when it came to
-setting up resources like databases and mockservers but this doesn't have to be
+setting up resources like databases and mock servers but this doesn't have to be
 the case anymore. In terms of prior art, Golang's built-in `testing` package has
 a `T.Cleanup` method ([docs][go-cleanup]) and the Ava test framework has a
 similar `t.teardown` ([docs][ava-teardown]) helper.
