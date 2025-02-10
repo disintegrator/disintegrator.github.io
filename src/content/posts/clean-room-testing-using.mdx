@@ -1,0 +1,291 @@
+---
+title: Clean room tests with JavaScript's `using` keyword
+summary: A slick approach to test encapsulation when using a database
+publishDate: "2025-02-10"
+---
+
+[erm-proposal]: https://github.com/tc39/proposal-explicit-resource-management
+[go-cleanup]: https://pkg.go.dev/testing#T.Cleanup
+[ava-teardown]: https://github.com/avajs/ava/blob/10e2e8a35a07b7e38410d90ff763e75b0577edad/docs/02-execution-context.md#tteardownfn
+
+A little while ago the [Explicit Resource Management proposal][erm-proposal] was
+promoted to stage 3 and with it the introduction of the `using` keyword. Support
+for this feature was then introduced into TypeScript 5.2. I _love_ this feature
+and, almost instantly, it gave me the idea to incorporate it into my testing to
+cleanly encapsulate the process of creating test databases, mock servers and so
+on and then tearing them down to avoid conflicts, contentions and runaway
+resource usage.
+
+A common mishap with testing is when one test writes to shared resources like
+the file system or a database in such a way that it affects the outcome of
+subsequent tests and test runs. To solve this problem, we often need to write
+code that directs the side effects of a test to dedicated, temporary or
+throwaway resources. For example, if we're testing code that writes to the
+filesytem, we can achieve test isolation like this:
+
+```ts title="test.ts"
+import fs from "node:fs";
+import path from "node:path";
+import { test, expect } from "vitest";
+
+test("write monthly reports to disk", async () => {
+	const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "test-"));
+
+	const report = await writeReport(tmpDir);
+
+	expect(fs.existsSync(path.join(tmpDir, "report.csv"))).toBe(true);
+});
+
+test("read monthly reports from disk", async () => {
+	const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "test-"));
+	const reportPath = path.join(tmpDir, "report.csv");
+
+	fs.writeFileSync(reportPath, "y,q1,q2,q3,q4\n2025,10,20,30,40");
+
+	const report = await readReports(reportPath);
+
+	expect(report).toEqual([{ year: 2025, q: [10, 20, 30, 40] }]);
+});
+```
+
+The two tests above won't interfere with each other because each will write to
+a different randomly named temporary directory.
+
+Something similar can be done to spin up test databases for each test. However,
+it will be additionally useful to close connections and tear down these
+databases after each test.
+
+Let's look at how we can achieve test isolation when working with databases with
+the help of the new JavaScript syntax and some useful libraries.
+
+## Prelude
+
+To pull off this demo, I'm going to be using the following components:
+
+- [Vitest](https://vitest.dev/) for writing and running tests.
+- [PostgreSQL](https://www.postgresql.org/) for the database.
+- [Testcontainers](https://www.testcontainers.org/) which will be used to
+  seamlessly create the PostgreSQL containers when running tests.
+- [Drizzle](https://orm.drizzle.team/) as the database migration tool and ORM.
+
+## Vitest configuration
+
+Before we execute any tests, we need to spin up a PostgreSQL container. This
+process will done in a global setup script that Vitest will run for us. We
+specify this in the `vitest.config.ts` file:
+
+```ts title="vitest.config.ts" {5}
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+	test: {
+		globalSetup: ["./src/testing/setup-db.ts"],
+	},
+});
+```
+
+## Global setup
+
+In our global setup script, we'll declare `setup` and `teardown` functions that
+will:
+
+1. Create the PostgreSQL container.
+2. Apply all our project's migrations to the test database.
+3. Store connection information for the test database in the Vitest environment.
+4. Stop the container when Vitest is done.
+
+In code, it will look something like this:
+
+```ts title="src/testing/setup-db.ts"
+import path from "node:path";
+import {
+	PostgreSqlContainer,
+	type StartedPostgreSqlContainer,
+} from "@testcontainers/postgresql";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { Pool } from "pg";
+import type { TestProject } from "vitest/node";
+
+declare module "vitest" {
+	// Augment this type to let TypeScript know about what we're stashing in test
+	// context. Other test code will be able to using the `inject` function to
+	// access these values.
+	export interface ProvidedContext {
+		dbURI: string;
+		templateDB: string;
+	}
+}
+
+let container!: StartedPostgreSqlContainer;
+
+export async function setup(project: TestProject) {
+	container = await new PostgreSqlContainer().start();
+
+	const pool = new Pool({ connectionString: container.getConnectionUri() });
+
+	const db = drizzle(pool);
+	await migrate(db, {
+		migrationsFolder: path.join(process.cwd(), "drizzle"),
+	});
+
+	await pool.end();
+
+	project.provide("dbURI", container.getConnectionUri());
+	project.provide("templateDB", container.getDatabase());
+}
+
+export async function teardown() {
+	await container?.stop();
+}
+```
+
+The interesting part that we've yet to see is that we won't be using the default
+database in our tests. Instead, we're going to treat it as a "template" database
+and each test that wants to work with a database will have a clone to mutate.
+
+## Creating a helper function
+
+We want each test to work with a pristine database since this will guarantee us
+that tests are isolated from each other. To make it seamless, we also want don't
+test authors to worry about cleaning up at the end of each test regardless of
+whether or not the test passed. Here's what our helper function will look like:
+
+```ts title="src/testing/db.ts" {26-28}
+import crypto from "node:crypto";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { inject } from "vitest";
+
+let setupPool!: Pool;
+
+export async function createDatabaseClient() {
+	const dbURI = inject("dbURI");
+	const db = inject("templateDB");
+
+	if (!setupPool) {
+		setupPool = new Pool({ connectionString: dbURI });
+	}
+
+	const name = `test_${crypto.randomBytes(8).toString("hex")}`;
+
+	await setupPool.query(`CREATE DATABASE ${name} TEMPLATE ${db}`);
+
+	const connectionString = new URL(`/${name}`, dbURI).toString();
+
+	const p = new Pool({ connectionString });
+
+	return {
+		db: drizzle(p),
+		async [Symbol.asyncDispose]() {
+			await p.end();
+		},
+	};
+}
+```
+
+In the code above, we're creating a connection to the PostgreSQL container which
+we created in our global setup script in order to clone our default (read:
+template) database. Each time we clone we use a randomly generated database name
+to avoid collisions with other tests. Finally, we return an object with a
+Drizzle database client that tests will use and an interesting property
+`[Symbol.asyncDispose]`. I'll gloss over it for now because it'll be more
+apparent how it works when we get to use our helper function.
+
+## Writing tests
+
+Ok, now that we have everything in place, we can start writing out tests using
+our newly created helper function. Here are a couple of contrived examples:
+
+```ts title="src/example.test.ts"
+import { faker } from "@faker-js/faker";
+import { expect, test } from "vitest";
+import { todosTable, usersTable } from "./db/schema";
+import { createDatabaseClient } from "./testing/db";
+
+test("create user", async () => {
+	await using handle = await createDatabaseClient();
+
+	const { db } = handle;
+	const result = await db.insert(usersTable).values({
+		displayName: faker.person.fullName(),
+	});
+	expect(result.rowCount).toEqual(1);
+});
+
+test("create 10 todos", async () => {
+	await using handle = await createDatabaseClient();
+
+	const newTodos = Array.from({ length: 10 }, () => ({
+		title: faker.lorem.sentence(),
+	}));
+
+	const { db } = handle;
+	const result = await db.insert(todosTable).values(newTodos);
+	expect(result.rowCount).toEqual(newTodos.length);
+});
+```
+
+When you run these tests with `npx vitest run` you'll likely see the tests pass:
+
+```
+ ✓ src/example.test.ts (2 tests) 71ms
+   ✓ create 10 todos
+   ✓ create user
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  21:15:31
+   Duration  1.96s
+```
+
+Crucially, as each test runs, a randomly named database will be spun up and torn
+down.
+
+Let's focus in on this line:
+
+```
+await using dbResources = await createDatabaseClient();
+```
+
+There are two `await` keywords here which looks confusing and now we see the new
+`using` keyword. Let me show you an alternate and rough translation of this
+syntax to clear things up:
+
+```ts title="using-boilerplate.ts" "await"
+test("create user", async () => {
+	let handle: AsyncDisposable | undefined;
+	try {
+		handle = await createDatabaseClient();
+
+		// do some stuff with the database
+	} finally {
+		const cleanupFunc = handle?.[Symbol.asyncDispose];
+		if (cleanupFunc) {
+			await cleanupFunc();
+		}
+	}
+});
+```
+
+## Wrap up
+
+One of my least favorite aspects of many test frameworks is how you're driven
+towards declaring shared variables that are initialized and reset in
+`beforeEach` and `afterEach` hooks. Each tests starts to leak its setup and
+teardown steps and you find yourself scrolling up and down a test file to
+reconstruct what a test is doing. My primary principle with testing is that each
+test should be fully self-contained and give you a complete picture of the
+setup-action-assertion-teardown cycle. The result of following this principle is
+that you will quickly understand and fix or modify a broken test because all you
+need to parse is within the lexical scope of a `test("…", async () => { … })`
+callback. Historically, this principle was often violated when it came to
+setting up resources like databases and mockservers but this doesn't have to be
+the case anymore. In terms of prior art, Golang's built-in `testing` package has
+a `T.Cleanup` method ([docs][go-cleanup]) and the Ava test framework has a
+similar `t.teardown` ([docs][ava-teardown]) helper.
+
+Now, JavaScript and TypeScript now have syntax and a runtime primitive for
+describing the lifecycle of resources. We've seen how these can be used in the
+context of testing but they go well beyond that and can be used in production
+code.
