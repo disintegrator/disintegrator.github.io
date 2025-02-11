@@ -30,4 +30,4 @@ const site = Astro.site?.toString().replace(/\/$/, "");
 const ogImage = site ? `${site}/og/posts/${entry.slug}.png` : null;
 ---
 
-<PostLayout entry={entry} ogImage={ogImage} noIndex />
+<PostLayout entry={entry} ogImage={ogImage} />
