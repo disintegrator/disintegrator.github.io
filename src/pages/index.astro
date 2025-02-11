@@ -46,7 +46,11 @@ const ogImage = site ? `${site}/og/home.png` : null;
 			<meta slot="head" name="twitter:card" content="summary_large_image" />
 		) : null
 	}
-	{ogImage ? <meta slot="head" property="og:image" content={ogImage} /> : null}
+	{
+		ogImage ? (
+			<meta slot="head" name="image" property="og:image" content={ogImage} />
+		) : null
+	}
 
 	<main>
 		<header

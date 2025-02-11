@@ -32,7 +32,11 @@ const tocTree = generateTableOfContents(headings);
 <Layout {...rest} title={entry.data.title} description={entry.data.summary}>
 	<meta slot="head" property="og:title" content={entry.data.title} />
 	<meta slot="head" name="twitter:title" content={entry.data.title} />
-	{ogImage ? <meta slot="head" property="og:image" content={ogImage} /> : null}
+	{
+		ogImage ? (
+			<meta slot="head" name="image" property="og:image" content={ogImage} />
+		) : null
+	}
 	{
 		ogImage ? (
 			<meta slot="head" name="twitter:card" content="summary_large_image" />
