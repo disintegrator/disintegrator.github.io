@@ -7,6 +7,7 @@ const postsCollection = defineCollection({
 		summary: z.string(),
 		tags: z.array(z.string()).optional(),
 		publishDate: z.string().transform((str) => new Date(str)),
+		bluesky: z.string().url().optional(),
 		draft: z.boolean().optional(),
 	}),
 });

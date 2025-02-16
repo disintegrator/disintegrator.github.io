@@ -2,6 +2,7 @@
 title: Fetch and HTTP/2 support in Node.js, Bun and Deno
 summary: It's a mixed bag
 publishDate: "2025-01-19"
+bluesky: https://blog.disintegrator.dev/posts/http2-support-in-js-runtimes/
 ---
 
 [speakeasy]: https://www.speakeasy.com/
@@ -16,7 +17,10 @@ Recently at [Speakeasy][speakeasy], we received a report that a user was unable 
 
 import devtoolsFetchH2 from "../../images/devtools-fetch-http2.png";
 
-<ImageLink src={devtoolsFetchH2} alt="A screenshot of Chrome developer tools showing the network tab with fetch requests using the h2 protocol" /> 
+<ImageLink
+	src={devtoolsFetchH2}
+	alt="A screenshot of Chrome developer tools showing the network tab with fetch requests using the h2 protocol"
+/>{" "}
 
 Of course, the situation with backend JavaScript is rather different. With a small test setup I found that Node.js, Bun and Deno have varying support which may either be opt-in or outright unavailable.
 
@@ -82,12 +86,12 @@ $ curl -v https://devbox.dev:8443/greet
 > Host: devbox.dev:8443
 > User-Agent: curl/8.5.0
 > Accept: */*
-> 
-< HTTP/2 200 
+>
+< HTTP/2 200
 < content-type: text/plain; charset=utf-8
 < content-length: 13
 < date: Sun, 19 Jan 2025 13:55:52 GMT
-< 
+<
 * Connection #0 to host devbox.dev left intact
 Hello, world!%
 ```

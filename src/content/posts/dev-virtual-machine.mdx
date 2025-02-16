@@ -2,6 +2,7 @@
 title: Developing inside a virtual machine
 summary: Keeping my laptop clean by developing in a virtual machine
 publishDate: "2024-12-29"
+bluesky: https://bsky.app/profile/disintegrator.dev/post/3lehkplf37c23
 ---
 
 import { Picture } from "astro:assets";
@@ -12,7 +13,22 @@ At Speakeasy, we build code generation for SDKs in multiple languages. At the ou
 
 For some time, I had known about Mitchell Hashimoto's setup in which he works in a VM on his MacBook. I have been working with a similar setup for over a year now and it's been a fantastic experience.
 
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">I switched my primary dev environment to a graphical NixOS VM on a macOS host. It has been wonderful. I can keep the great GUI ecosystem of macOS, but all dev tools are in a full screen VM. One person said “it basically replaced your terminal app” which is exactly how it feels.</p>&mdash; Mitchell Hashimoto (@mitchellh) <a href="https://twitter.com/mitchellh/status/1346136404682625024?ref_src=twsrc%5Etfw">January 4, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet">
+	<p lang="en" dir="ltr">
+		I switched my primary dev environment to a graphical NixOS VM on a macOS
+		host. It has been wonderful. I can keep the great GUI ecosystem of macOS,
+		but all dev tools are in a full screen VM. One person said “it basically
+		replaced your terminal app” which is exactly how it feels.
+	</p>
+	&mdash; Mitchell Hashimoto (@mitchellh){" "}
+	<a href="https://twitter.com/mitchellh/status/1346136404682625024?ref_src=twsrc%5Etfw">
+		January 4, 2021
+	</a>
+</blockquote> <script
+	async
+	src="https://platform.twitter.com/widgets.js"
+	charset="utf-8"
+></script>
 
 ## The setup
 
@@ -26,19 +42,28 @@ On the host (macOS), I do not use homebrew or have any other package managers. I
 
 import vscExt from "../../images/vscode-extensions.png";
 
-<ImageLink src={vscExt} alt="A screenshot of VS Code showing most extensions installed and running inside the VM" /> 
+<ImageLink
+	src={vscExt}
+	alt="A screenshot of VS Code showing most extensions installed and running inside the VM"
+/>{" "}
 
 Going back to iTerm2, I use the tmux integration which maps windows and panes to the native GUI. It's such a smooth experience to working with tmux using keyboard shortcuts I'm familiar with (⌘T for new tabs and ⌘D / ⌘⇧D for horizontal / vertical splits).
 
 import tmuxIterm2 from "../../images/tmux-iterm2.png";
 
-<ImageLink src={tmuxIterm2} alt="iTerm2 with tmux integration showing how windows and panes map to native tabs and splits" /> 
+<ImageLink
+	src={tmuxIterm2}
+	alt="iTerm2 with tmux integration showing how windows and panes map to native tabs and splits"
+/>{" "}
 
 I think it's also worth talking about my Git / GitHub workflow. I use an SSH key to authenticate with GitHub and to sign my commits. My private key does not live directly on my host or my guest OS. Instead, it lives in 1Password and is only accessible using my master password or TouchID. What's super convenient is that I can access the key from within the VM using 1Password's SSH agent. So any time I `git fetch` or `git commit` I get the native 1Password GUI to unlock and grant access to the key.
 
 import ssh1p from "../../images/1password-ssh.png";
 
-<ImageLink src={ssh1p} alt="Running git fetch in my development VM triggers the 1Password prompt to grant access to the key" />
+<ImageLink
+	src={ssh1p}
+	alt="Running git fetch in my development VM triggers the 1Password prompt to grant access to the key"
+/>
 
 When I want to access TCP services in the VM, such as development servers and databases, I use Tailscale which creates a nice DNS name for my guest VM that I can access from my host machine (see [MagicDNS](https://tailscale.com/kb/1081/magicdns)). Again, Tailscale is invisible software and I rarely pay attention to it except for when there's an update.
 

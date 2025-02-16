@@ -66,7 +66,7 @@ const tocTree = generateTableOfContents(headings);
 		>
 			<SiteNav />
 		</div>
-		<div class="col-span-full lg:col-span-6 xl:col-span-8">
+		<div class="col-span-full lg:col-span-6 xl:col-span-8 mb-10">
 			<article class="mx-auto lg:mx-0 max-w-prose p-6">
 				<H1>{entry.data.title}</H1>
 				<Content
@@ -87,6 +87,16 @@ const tocTree = generateTableOfContents(headings);
 					}}
 				/>
 			</article>
+
+			{
+				entry.data.bluesky ? (
+					<nav class="mx-auto lg:mx-0 max-w-prose p-6 border-t border-neutral-300 dark:border-neutral-800">
+						<Link class="font-medium" href={entry.data.bluesky}>
+							Discuss on Bluesky
+						</Link>
+					</nav>
+				) : null
+			}
 		</div>
 		<aside
 			class:list={[
