@@ -1,0 +1,76 @@
+---
+title: An ode to TypeScript enums
+summary: Pouring one out for a fallen friend
+publishDate: "2025-03-02"
+---
+
+[ts-5-8]: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-8.html
+[ts-0-9]: https://devblogs.microsoft.com/typescript/announcing-typescript-0-9/#enums
+[ts-1-5]: https://devblogs.microsoft.com/typescript/announcing-typescript-1-5/#simplifying-modules
+[ts-3-4]: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions
+[kent-enums]: https://x.com/kentcdodds/status/1889755781207302316
+[matt-enums]: https://www.totaltypescript.com/why-i-dont-like-typescript-enums
+[theo-enums]: https://www.youtube.com/watch?v=Anu8vHXsavo
+
+It's official, folks. [TypeScript 5.8][ts-5-8] is out bringing with it the `--erasableSyntaxOnly` flag and the nail in the coffin for many of the near-primordial language features like [Enums][ts-0-9] and [Namespaces][ts-1-5]. Node.js v23 joined Deno and Bun in adding support for running TypeScript files withouth a build step. The one true limitation is that only files containing erasable TypeScript syntax are supported. Since Enums and Namespaces (ones holding values) violate that rule since they are transpiled to JavaScript objects. So the TypeScript team made it possible to ban those features with the new compiler flag and make it easy for folks to ensure their TS code is directly runnable.
+
+But the issues with Enums didn't start here. Over last few years, prominent TypeScript content creators have been making the case against enums on [social media][kent-enums], [blog posts][matt-enums] and [short video essays][theo-enums]. Let me stop here and say it out loud:
+
+> In almost all ways that matter, literal unions provide better ergonomics than enums and you should consider them first.
+
+The problem is that, like the articles I linked to there and many others out there, these statements are not interested in making a case for some of the strengths of enums. While I maintain my position above, I want to spend a minute eulogizing an old friend. Remember, `as const` assertions, which were introduced in [TypeScript 3.4][ts-3-4], were necessary to supplant enums. That's nearly 6 years of using enums since TypeScript 0.9!
+
+Probably my favorite argument in steelmanning enums is that you can document their members and the documentation is available anywhere you are accessing them. This includes deprecating them which can _so_ useful if you are building APIs that evolve over time.
+
+```ts
+enum PaymentMethod {
+	CreditCard = "credit-card",
+	DebitCard = "debig-card",
+	Bitcoin = "bitcoin",
+	/**
+	 * Use an electronic check to pay your bills. Please note that this may take
+	 * up to 3 business days to go through.
+	 *
+	 * @deprecated Checks will no longer be accepted after 2025-04-30
+	 */
+	Check = "check",
+}
+
+const method = PaymentMethod.Check;
+```
+
+import tsEnumsDocs from "../../images/ts-enums-tsdoc.png";
+
+<ImageLink
+	src={tsEnumsDocs}
+	alt="A screenshot of the TypeScript Playgound with the mouse hovering over a deprecated enum member that clearly shows TSDoc comments and deprecation notice"
+/>
+
+There have been many instances where a union member's value on its own is not perfectly self-explanatory or at least ambiguous when living alongside similar unions in a large codebase. The documentation has to be combined into the TSDoc comment of the union type which cannot reflect deprecations and is not shown when hovering over a union member.
+
+```ts {"Nothing shown when hovering over 'check'":12} /= ("check");/
+type PaymentMethod =
+	| "credit-card"
+	| "debit-card"
+	| "bitcoin"
+	/**
+	 * Use an electronic check to pay your bills. Please note that this may
+	 * take up to 3 business days to go through.
+	 *
+	 * @deprecated Checks will no longer be accepted after 2025-04-30
+	 */
+	| "check";
+
+const method: PaymentMethod = "check";
+```
+
+There are ways to get around this limitation where object literals with a `const` assertion are used but the reality is that these literals aren't typically imported and used by users of a library. They tend to be built up by library authors to have an iterable/indexable mapping around when validating unknown values or to enumerate in a UI e.g. in error messages or to build a `<select>` dropdown.
+
+import tsConstObjectDocs from "../../images/ts-const-object-tsdocs.png";
+
+<ImageLink
+	src={tsConstObjectDocs}
+	alt="A screenshot of the TypeScript Playgound with the mouse hovering over a deprecated key of an object literal and also clearly shows TSDoc comments and deprecation notice"
+/>
+
+There are a couple more quality of life features that enums possess but I'm choosing not to go through here. For me personally, the degraded inline documentation is by far the toughest pill to swallow in moving to literal unions and I wanted to focus on that. I'm really hoping the TypeScript team finds a way to support TSDoc on union members as the world moves away from enums.
